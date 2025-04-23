@@ -12,6 +12,8 @@ local screenWidth, screenHeight = term.getSize()
 
 -- local seed = math.randomseed(42)
 
+local debugPrint = {}
+
 local ante = 1
 local money = 0
 
@@ -36,13 +38,13 @@ local selectedHand = {}
 
 local suits = { { 'H', '\3', colors.red }, { 'D', '\4', colors.orange }, { 'C', '\5', colors.blue }, { 'S', '\6', colors.black } }
 
-
 local fullDeck = {
     "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "JH", "KH", "QH", "AH",
     "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "JD", "KD", "QD", "AD",
     "1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "JS", "KS", "QS", "AS",
     "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "JC", "KC", "QC", "AC",
 }
+
 local currentDeck = {}
 local baseDeck = {}
 
@@ -71,7 +73,6 @@ local handTypes = {
 }
 
 -- -- -- -- general functions -- -- -- --
-
 -- removes the first occurence of value in table
 local function del(t, v)
     for i = 1, #t do
@@ -212,24 +213,44 @@ end
 
 local function sortBy(property, cards)
     -- insertion sort
-    for i = 2, #cards do
-        local currentOrder = cards[i][property]
-        local current = cards[i]
+    local tempDeck = cards
+    for i = 2, #tempDeck do
+
+        local currentOrder = tempDeck[i][property]
+        local current = tempDeck[i]
+        
         local j = i - 1
-        while (j >= 1 and currentOrder < cards[j][property]) do
-            cards[j + 1] = cards[j]
+        while (j >= 1 and currentOrder < tempDeck[j][property]) do
+            tempDeck[j + 1] = tempDeck[j]
             j = j - 1
         end
-        cards[j + 1] = current
+        tempDeck[j + 1] = current
     end
+    return tempDeck
 end
 
 local function sortByX(cards)
-    sortBy("posx", cards)
+    return sortBy("posx", cards)
 end
 
-local function sortByRankDescending(cards)
-    sortBy("order", cards)
+local function sortRank(cards)
+    return sortBy("order", cards)
+end
+
+local function sortSuit(cards)
+    cards = sortRank(cards)
+    local sdeck = { ["S"] = {}, ["D"] = {}, ["C"] = {}, ["H"] = {} }
+    local sorted = {}
+    for i, v in pairs(cards) do
+        table.insert(sdeck[v.suit[1]], v)
+    end
+    for i, v in pairs({ "S", "D", "C", "H" }) do
+        for k, h in pairs(sdeck[v]) do
+            table.insert(sorted, h)
+        end
+    end
+    -- cards = sorted
+    return sorted
 end
 
 local function dealHand(shuffledDeck, cardsToDeal)
@@ -244,7 +265,8 @@ local function dealHand(shuffledDeck, cardsToDeal)
             del(shuffledDeck, shuffledDeck[1])
         end
     end
-    sortByRankDescending(currentHand)
+    currentHand = sortSuit(currentHand)
+    -- currentHand = sortRank(currentHand)
 end
 
 -- -- -- -- end game functions -- -- -- --
@@ -323,7 +345,7 @@ end
 
 -- debug function to see all cards, may repurpose later for viewing deck
 local function renderAllCards(cards)
-    sortByRankDescending(cards)
+    cards = sortSuit(cards)
     local baseXOff = 1
     local baseX = 1
     local baseY = 1
@@ -369,7 +391,7 @@ function obsi.draw()
     renderDeck()
     renderHand()
 
-    -- renderAllCards(baseDeck)
+    -- renderAllCards(currentDeck)
 end
 
 obsi.init()
