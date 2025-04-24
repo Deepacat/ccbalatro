@@ -6,7 +6,74 @@
     <https://github.com/simadude/obsi2> for CC game engine
 ]] --
 local obsi = require("obsi2")
-local vars = require("vars")
+
+-- vars
+local screenWidth, screenHeight = term.getSize()
+
+-- local seed = math.randomseed(42)
+
+local debugPrint = {}
+
+local sortMode = "suit"
+local sortTest = ""
+
+local ante = 1
+local money = 0
+
+local handSize = 8
+local handsLeft = 4
+local discardsLeft = 3
+local maxHands = 4
+local maxDiscards = 3
+
+local curChips = 0
+local curMult = 0
+local totalScore = 0
+local blindReq = 300
+
+local currentMaxJokers = 5
+local currentMaxConsumables = 2
+local heldJokers = {}
+local heldConsumables = {}
+
+local currentHand = {}
+local selectedHand = {}
+
+local suits = { { 'H', '\3', colors.red }, { 'D', '\4', colors.orange }, { 'C', '\5', colors.blue }, { 'S', '\6', colors.black } }
+
+local fullDeck = {
+    "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "JH", "KH", "QH", "AH",
+    "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "JD", "KD", "QD", "AD",
+    "1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "JS", "KS", "QS", "AS",
+    "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "JC", "KC", "QC", "AC",
+}
+
+local currentDeck = {}
+local baseDeck = {}
+
+local ranks = {
+    { rank = 'A', baseChips = 11 }, { rank = 'K', baseChips = 10 }, { rank = 'Q', baseChips = 10 },
+    { rank = 'J', baseChips = 10 }, { rank = '10', baseChips = 10 }, { rank = '9', baseChips = 9 },
+    { rank = '8', baseChips = 8 }, { rank = '7', baseChips = 7 }, { rank = '6', baseChips = 6 },
+    { rank = '5', baseChips = 5 }, { rank = '4', baseChips = 4 }, { rank = '3', baseChips = 3 },
+    { rank = '2', baseChips = 2 },
+}
+
+local handTypes = {
+    ["Flush Five"] = { baseChips = 160, baseMult = 16, level = 1 },
+    ["Flush House"] = { baseChips = 140, baseMult = 14, level = 1 },
+    ["Five of a Kind"] = { baseChips = 120, baseMult = 12, level = 1 },
+    ["Royal Flush"] = { baseChips = 100, baseMult = 8, level = 1 },
+    ["Straight Flush"] = { baseChips = 100, baseMult = 8, level = 1 },
+    ["Four of a Kind"] = { baseChips = 60, baseMult = 7, level = 1 },
+    ["Full House"] = { baseChips = 40, baseMult = 4, level = 1 },
+    ["Flush"] = { baseChips = 35, baseMult = 4, level = 1 },
+    ["Straight"] = { baseChips = 30, baseMult = 4, level = 1 },
+    ["Three of a Kind"] = { baseChips = 30, baseMult = 3, level = 1 },
+    ["Two Pair"] = { baseChips = 20, baseMult = 2, level = 1 },
+    ["Pair"] = { baseChips = 10, baseMult = 2, level = 1 },
+    ["High Card"] = { baseChips = 5, baseMult = 1, level = 1 }
+}
 
 -- -- -- -- general functions -- -- -- --
 local function dump(o)
@@ -81,7 +148,7 @@ end
 
 -- -- -- -- game functions -- -- -- --
 local function resetDeck()
-    vars.currentDeck = vars.fullDeck
+    currentDeck = fullDeck
 end
 
 local itemObj = {
@@ -125,19 +192,19 @@ local function createBaseDeck()
     -- used as proxy for rank in
     -- array returned by
     -- card_frequencies()
-    for i, card in pairs(vars.ranks) do
+    for i, card in pairs(ranks) do
         card.order = i
     end
 
     -- Create deck
-    for x = 1, #vars.ranks do
-        for y = 1, #vars.suits do
+    for x = 1, #ranks do
+        for y = 1, #suits do
             local cardInfo = cardObj:new({
-                rank = vars.ranks[x].rank,
-                suit = vars.suits[y],
+                rank = ranks[x].rank,
+                suit = suits[y],
                 -- sprite_index = ranks[x].sprite_index,
-                chips = vars.ranks[x].baseChips,
-                order = vars.ranks[x].order,
+                chips = ranks[x].baseChips,
+                order = ranks[x].order,
             })
             add(tempBaseDeck, cardInfo)
         end
@@ -190,7 +257,7 @@ local function sortSuit(cards)
     local sdeck = { ["S"] = {}, ["D"] = {}, ["C"] = {}, ["H"] = {} }
     local sorted = {}
     for i, v in pairs(cards) do
-        vars.sortTest = dump(v)
+        sortTest = dump(v)
         table.insert(sdeck[v.suit[1]], v)
     end
     for i, v in pairs({ "S", "D", "C", "H" }) do
@@ -203,10 +270,10 @@ local function sortSuit(cards)
 end
 
 local function sort(cards)
-    if (vars.sortMode == "rank") then
+    if (sortMode == "rank") then
         return sortRank(cards)
     end
-    if (vars.sortMode == "suit") then
+    if (sortMode == "suit") then
         return sortSuit(cards)
     end
 end
@@ -214,16 +281,16 @@ end
 local function dealHand(shuffledDeck, cardsToDeal)
     if #shuffledDeck < cardsToDeal then
         for card in all(shuffledDeck) do
-            add(vars.currentHand, card)
+            add(currentHand, card)
             del(shuffledDeck, card)
         end
     else
         for x = 1, cardsToDeal do
-            add(vars.currentHand, shuffledDeck[1])
+            add(currentHand, shuffledDeck[1])
             del(shuffledDeck, shuffledDeck[1])
         end
     end
-    vars.currentHand = sort(vars.currentHand)
+    currentHand = sort(currentHand)
 end
 
 -- -- -- -- end game functions -- -- -- --
@@ -234,33 +301,33 @@ local function renderbg()
 end
 
 local function renderScore()
-    obsi.graphics.write(tostring(vars.curChips), 2, 10, colors.white, colors.blue)
-    obsi.graphics.write("x", 2 + #tostring(vars.curChips), 10, colors.white, colors.green)
-    obsi.graphics.write(tostring(vars.curMult), 3 + #tostring(vars.curChips), 10, colors.white, colors.red)
-    obsi.graphics.write(vars.totalScore .. "/", 2, 11, colors.white, colors.green)
-    obsi.graphics.write(tostring(vars.blindReq), 2, 12, colors.white, colors.green)
+    obsi.graphics.write(tostring(curChips), 2, 10, colors.white, colors.blue)
+    obsi.graphics.write("x", 2 + #tostring(curChips), 10, colors.white, colors.green)
+    obsi.graphics.write(tostring(curMult), 3 + #tostring(curChips), 10, colors.white, colors.red)
+    obsi.graphics.write(totalScore .. "/", 2, 11, colors.white, colors.green)
+    obsi.graphics.write(tostring(blindReq), 2, 12, colors.white, colors.green)
 end
 
 local function renderMoney()
-    obsi.graphics.write("$:" .. tostring(vars.money), 2, 17, colors.white, colors.lime)
+    obsi.graphics.write("$:" .. tostring(money), 2, 17, colors.white, colors.lime)
 end
 
 local function renderAnte()
-    obsi.graphics.write("A:" .. vars.ante .. "/8", 2, 18, colors.white, colors.orange)
+    obsi.graphics.write("A:" .. ante .. "/8", 2, 18, colors.white, colors.orange)
 end
 
 local function renderPlayBtn()
     obsi.graphics.setForegroundColor(colors.cyan)
     obsi.graphics.rectangle("fill", 16, 17, 7, 2)
     obsi.graphics.write("PLAY", 17, 17, colors.white, colors.cyan)
-    obsi.graphics.write(vars.handsLeft .. "/" .. vars.maxHands, 18, 18, colors.white, colors.cyan)
+    obsi.graphics.write(handsLeft .. "/" .. maxHands, 18, 18, colors.white, colors.cyan)
 end
 
 local function renderDiscardBtn()
     obsi.graphics.setForegroundColor(colors.red)
     obsi.graphics.rectangle("fill", 28, 17, 7, 2)
     obsi.graphics.write("DISCARD", 28, 17, colors.white, colors.red)
-    obsi.graphics.write(vars.discardsLeft .. "/" .. vars.maxDiscards, 30, 18, colors.white, colors.red)
+    obsi.graphics.write(discardsLeft .. "/" .. maxDiscards, 30, 18, colors.white, colors.red)
 end
 
 local function renderSortBtn()
@@ -273,27 +340,27 @@ end
 local function renderJokers()
     obsi.graphics.setForegroundColor(colors.white)
     obsi.graphics.rectangle("fill", 2, 2, 3, 3)
-    obsi.graphics.write(tostring(#vars.heldJokers) .. "/" .. tostring(vars.currentMaxJokers), 2, 6, colors.white, colors.green)
+    obsi.graphics.write(tostring(#heldJokers) .. "/" .. tostring(currentMaxJokers), 2, 6, colors.white, colors.green)
 end
 
 local function renderConsumables()
     obsi.graphics.setForegroundColor(colors.white)
     obsi.graphics.rectangle("fill", 48, 2, 3, 3)
-    obsi.graphics.write(tostring(#vars.heldConsumables) .. "/" .. tostring(vars.currentMaxConsumables), 48, 6, colors.white,
+    obsi.graphics.write(tostring(#heldConsumables) .. "/" .. tostring(currentMaxConsumables), 48, 6, colors.white,
         colors.green)
 end
 
 local function renderDeck()
     -- maybe use nfp asset later
     obsi.graphics.rectangle("fill", 48, 14, 3, 3)
-    obsi.graphics.write(#vars.currentDeck .. "/" .. #vars.fullDeck, 46, 18, colors.white, colors.green)
+    obsi.graphics.write(#currentDeck .. "/" .. #fullDeck, 46, 18, colors.white, colors.green)
 end
 
 local function renderHand()
-    for i = 1, #vars.currentHand do
-        local baseX = (vars.screenWidth / 2 + 1) - (#vars.currentHand * 3 / 2)
+    for i = 1, #currentHand do
+        local baseX = (screenWidth / 2 + 1) - (#currentHand * 3 / 2)
         local baseY = 14
-        local cur = vars.currentHand[i]
+        local cur = currentHand[i]
         obsi.graphics.rectangle("fill", baseX + 3 * (i - 1), baseY, 2, 2)
         obsi.graphics.write(tostring(cur.rank), baseX + 3 * (i - 1), baseY, cur.suit[3], colors.white)
         obsi.graphics.write(" " .. cur.suit[2], baseX + 3 * (i - 1), baseY + 1, cur.suit[3], colors.white)
@@ -324,19 +391,19 @@ end
 function obsi.load()
     resetDeck()
     createBaseDeck()
-    vars.baseDeck = createBaseDeck()
-    vars.currentDeck = shuffleDeck(vars.baseDeck)
-    dealHand(vars.currentDeck, vars.handSize)
+    baseDeck = createBaseDeck()
+    currentDeck = shuffleDeck(baseDeck)
+    dealHand(currentDeck, handSize)
 end
 
 function obsi.onKeyPress(key)
     if key == 57 then
-        if vars.sortMode == "suit" then
-            vars.sortMode = "rank"
+        if sortMode == "suit" then
+            sortMode = "rank"
         else
-            vars.sortMode = "suit"
+            sortMode = "suit"
         end
-        vars.currentHand = sort(vars.currentHand)
+        currentHand = sort(currentHand)
     end
 end
 
@@ -363,8 +430,8 @@ function obsi.draw()
     renderDeck()
     renderHand()
 
-    obsi.graphics.write(vars.sortMode, 10, 5, colors.white, colors.green)
-    obsi.graphics.write(vars.sortTest, 10, 6, colors.white, colors.green)
+    obsi.graphics.write(sortMode, 10, 5, colors.white, colors.green)
+    obsi.graphics.write(sortTest, 10, 6, colors.white, colors.green)
     -- renderAllCards(currentDeck)
 end
 
