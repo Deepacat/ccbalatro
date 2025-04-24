@@ -1,0 +1,14 @@
+{
+    "Lua.workspace.library": [
+        "${addons}/cc-tweaked/module/library"
+    ],
+    "Lua.runtime.version": "Lua 5.2",
+    "Lua.runtime.builtin": {
+        "bit32": "enable",
+        "bit": "disable",
+        "utf8": "enable",
+        "io": "disable",
+        "os": "disable"
+    },
+    "Lua.workspace.checkThirdParty": false
+}
