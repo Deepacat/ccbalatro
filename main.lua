@@ -7,364 +7,54 @@
 ]] --
 local obsi = require("obsi2")
 local vars = require("vars")
-
--- -- -- -- general functions -- -- -- --
-local function dump(o)
-    if type(o) == 'table' then
-        local s = '{ '
-        for k, v in pairs(o) do
-            if type(k) ~= 'number' then k = '"' .. k .. '"' end
-            s = s .. '[' .. k .. '] = ' .. dump(v) .. ','
-        end
-        return s .. '} '
-    else
-        return tostring(o)
-    end
-end
-
--- removes the first occurence of value in table
-local function del(t, v)
-    for i = 1, #t do
-        if t[i] == v then
-            table.remove(t, i)
-            return
-        end
-    end
-end
-
--- shorthand for table.remove
-local deli = table.remove
-
--- shorthand for table.insert
-local function add(t, v)
-    return table.insert(t, v)
-end
-
--- returns the number of occurences of value appears in table
-local function count(t, v)
-    local c = 0
-    for i = 1, #t do
-        if t[i] == v then
-            c = c + 1
-        end
-    end
-    return c
-end
-
--- iterator in for loops to iterate over items in order they were added, similar to ipairs without key
-local function all(t)
-    local i = 0
-    local n = #t
-    return function()
-        i = i + 1
-        if i <= n then return t[i] end
-    end
-end
-
--- random number from 0 to x, or random entry in table
-local function rnd(x)
-    if type(x) == "number" then return math.random(x) end
-    if type(x) == "table" then return x[math.random(#x)] end
-end
-
--- shorthand for math.floor
-local function flr(x)
-    return math.floor(x)
-end
-
--- shorthand for math.abs
-local function abs(x)
-    return math.abs(x)
-end
-
--- -- -- -- general functions end -- -- -- --
-
--- -- -- -- game functions -- -- -- --
-local function resetDeck()
-    vars.currentDeck = vars.fullDeck
-end
-
-local itemObj = {
-    type = "card",
-    -- default size stuff
-    -- width = Card_width,
-    -- height = Card_height,
-    -- resettable params
-    selected = false,
-    posx = 0,
-    posy = 0,
-    fromx = nil,
-    fromy = nil,
-    frames = 0,
-    pickedUp = false
-}
-
-function itemObj:new(obj)
-    return setmetatable(obj, {
-        __index = self
-    })
-end
-
-local cardObj = itemObj:new({
-    type = "card",
-    bgtile = 15,
-    height = 15, -- scant 2 tiles
-    effectChips = 0,
-    mult = 0,
-    posx = 0,
-    posy = 0,
-    -- when_held_in_hand = do_nothing,
-    -- when_held_at_end = do_nothing,
-    -- effect = do_nothing,
-    -- card_effect = do_nothing
-})
-
-local function createBaseDeck()
-    local tempBaseDeck = {}
-    -- Set the sorting order, also
-    -- used as proxy for rank in
-    -- array returned by
-    -- card_frequencies()
-    for i, card in pairs(vars.ranks) do
-        card.order = i
-    end
-
-    -- Create deck
-    for x = 1, #vars.ranks do
-        for y = 1, #vars.suits do
-            local cardInfo = cardObj:new({
-                rank = vars.ranks[x].rank,
-                suit = vars.suits[y],
-                -- sprite_index = ranks[x].sprite_index,
-                chips = vars.ranks[x].baseChips,
-                order = vars.ranks[x].order,
-            })
-            add(tempBaseDeck, cardInfo)
-        end
-    end
-    return tempBaseDeck
-end
-
-local function shuffleDeck(deck)
-    local copyDeck = {}
-    for x = 1, #deck do
-        add(copyDeck, deck[x])
-    end
-    local shuffledDeck = {}
-
-    for x = 1, #copyDeck do
-        local rndCard = rnd(copyDeck)
-        add(shuffledDeck, rndCard)
-        del(copyDeck, rndCard)
-    end
-    return shuffledDeck
-end
-
-local function sortBy(property, cards)
-    -- insertion sort
-    local tempDeck = cards
-    for i = 2, #tempDeck do
-        local currentOrder = tempDeck[i][property]
-        local current = tempDeck[i]
-
-        local j = i - 1
-        while (j >= 1 and currentOrder < tempDeck[j][property]) do
-            tempDeck[j + 1] = tempDeck[j]
-            j = j - 1
-        end
-        tempDeck[j + 1] = current
-    end
-    return tempDeck
-end
-
-local function sortByX(cards)
-    return sortBy("posx", cards)
-end
-
-local function sortRank(cards)
-    return sortBy("order", cards)
-end
-
-local function sortSuit(cards)
-    cards = sortRank(cards)
-    local sdeck = { ["S"] = {}, ["D"] = {}, ["C"] = {}, ["H"] = {} }
-    local sorted = {}
-    for i, v in pairs(cards) do
-        vars.sortTest = dump(v)
-        table.insert(sdeck[v.suit[1]], v)
-    end
-    for i, v in pairs({ "S", "D", "C", "H" }) do
-        for k, h in pairs(sdeck[v]) do
-            table.insert(sorted, h)
-        end
-    end
-    -- cards = sorted
-    return sorted
-end
-
-local function sort(cards)
-    if (vars.sortMode == "rank") then
-        return sortRank(cards)
-    end
-    if (vars.sortMode == "suit") then
-        return sortSuit(cards)
-    end
-end
-
-local function dealHand(shuffledDeck, cardsToDeal)
-    if #shuffledDeck < cardsToDeal then
-        for card in all(shuffledDeck) do
-            add(vars.currentHand, card)
-            del(shuffledDeck, card)
-        end
-    else
-        for x = 1, cardsToDeal do
-            add(vars.currentHand, shuffledDeck[1])
-            del(shuffledDeck, shuffledDeck[1])
-        end
-    end
-    vars.currentHand = sort(vars.currentHand)
-end
-
--- -- -- -- end game functions -- -- -- --
-
--- -- -- -- rendering functions -- -- -- --
-local function renderbg()
-    obsi.graphics.setBackgroundColor(colors.green)
-end
-
-local function renderScore()
-    obsi.graphics.write(tostring(vars.curChips), 2, 10, colors.white, colors.blue)
-    obsi.graphics.write("x", 2 + #tostring(vars.curChips), 10, colors.white, colors.green)
-    obsi.graphics.write(tostring(vars.curMult), 3 + #tostring(vars.curChips), 10, colors.white, colors.red)
-    obsi.graphics.write(vars.totalScore .. "/", 2, 11, colors.white, colors.green)
-    obsi.graphics.write(tostring(vars.blindReq), 2, 12, colors.white, colors.green)
-end
-
-local function renderMoney()
-    obsi.graphics.write("$:" .. tostring(vars.money), 2, 17, colors.white, colors.lime)
-end
-
-local function renderAnte()
-    obsi.graphics.write("A:" .. vars.ante .. "/8", 2, 18, colors.white, colors.orange)
-end
-
-local function renderPlayBtn()
-    obsi.graphics.setForegroundColor(colors.cyan)
-    obsi.graphics.rectangle("fill", 16, 17, 7, 2)
-    obsi.graphics.write("PLAY", 17, 17, colors.white, colors.cyan)
-    obsi.graphics.write(vars.handsLeft .. "/" .. vars.maxHands, 18, 18, colors.white, colors.cyan)
-end
-
-local function renderDiscardBtn()
-    obsi.graphics.setForegroundColor(colors.red)
-    obsi.graphics.rectangle("fill", 28, 17, 7, 2)
-    obsi.graphics.write("DISCARD", 28, 17, colors.white, colors.red)
-    obsi.graphics.write(vars.discardsLeft .. "/" .. vars.maxDiscards, 30, 18, colors.white, colors.red)
-end
-
-local function renderSortBtn()
-    obsi.graphics.setForegroundColor(colors.orange)
-    obsi.graphics.rectangle("fill", 24, 17, 3, 2)
-    obsi.graphics.write("S O", 24, 17, colors.white, colors.orange)
-    obsi.graphics.write("R T", 24, 18, colors.white, colors.orange)
-end
-
-local function renderJokers()
-    obsi.graphics.setForegroundColor(colors.white)
-    obsi.graphics.rectangle("fill", 2, 2, 3, 3)
-    obsi.graphics.write(tostring(#vars.heldJokers) .. "/" .. tostring(vars.currentMaxJokers), 2, 6, colors.white, colors.green)
-end
-
-local function renderConsumables()
-    obsi.graphics.setForegroundColor(colors.white)
-    obsi.graphics.rectangle("fill", 48, 2, 3, 3)
-    obsi.graphics.write(tostring(#vars.heldConsumables) .. "/" .. tostring(vars.currentMaxConsumables), 48, 6, colors.white,
-        colors.green)
-end
-
-local function renderDeck()
-    -- maybe use nfp asset later
-    obsi.graphics.rectangle("fill", 48, 14, 3, 3)
-    obsi.graphics.write(#vars.currentDeck .. "/" .. #vars.fullDeck, 46, 18, colors.white, colors.green)
-end
-
-local function renderHand()
-    for i = 1, #vars.currentHand do
-        local baseX = (vars.screenWidth / 2 + 1) - (#vars.currentHand * 3 / 2)
-        local baseY = 14
-        local cur = vars.currentHand[i]
-        obsi.graphics.rectangle("fill", baseX + 3 * (i - 1), baseY, 2, 2)
-        obsi.graphics.write(tostring(cur.rank), baseX + 3 * (i - 1), baseY, cur.suit[3], colors.white)
-        obsi.graphics.write(" " .. cur.suit[2], baseX + 3 * (i - 1), baseY + 1, cur.suit[3], colors.white)
-    end
-end
-
--- debug function to see all cards, may repurpose later for viewing deck
-local function renderAllCards(cards)
-    cards = sort(cards)
-    local baseXOff = 1
-    local baseX = 1
-    local baseY = 1
-    for i = 1, #cards do
-        local cur = cards[i]
-        obsi.graphics.rectangle("fill", baseX + 3 * (baseXOff - 1), baseY, 2, 2)
-        obsi.graphics.write(tostring(cur.rank), baseX + 3 * (baseXOff - 1), baseY, cur.suit[3], colors.white)
-        obsi.graphics.write(" " .. cur.suit[2], baseX + 3 * (baseXOff - 1), baseY + 1, cur.suit[3], colors.white)
-        baseXOff = baseXOff + 1
-        if baseXOff > 16 then
-            baseXOff = 1
-            baseY = baseY + 3
-        end
-    end
-end
--- -- -- -- end rendering functions -- -- -- --
+local game = require("game")
+local render = require("render")
 
 -- Obsi run functions --
 function obsi.load()
-    resetDeck()
-    createBaseDeck()
-    vars.baseDeck = createBaseDeck()
-    vars.currentDeck = shuffleDeck(vars.baseDeck)
-    dealHand(vars.currentDeck, vars.handSize)
+    game.resetDeck()
+    game.createBaseDeck()
+    vars.baseDeck = game.createBaseDeck()
+    vars.currentDeck = game.shuffleDeck(vars.baseDeck)
+    game.dealHand(vars.currentDeck, vars.handSize)
 end
 
 function obsi.onKeyPress(key)
-    if key == 57 then
+    vars.sortTest = key
+    if key == 57 then -- SPACE
         if vars.sortMode == "suit" then
             vars.sortMode = "rank"
         else
             vars.sortMode = "suit"
         end
-        vars.currentHand = sort(vars.currentHand)
+        vars.currentHand = game.sort(vars.currentHand)
+    end
+    if key == 18 then -- E
+        game.dealHand(vars.currentDeck, 1)
     end
 end
 
 function obsi.update()
-    -- if obsi.keyboard.isDown("space") then
-    --     dealHand(currentDeck, 1)
-    -- end
-
     if obsi.keyboard.isDown("q") then
         obsi.quit()
     end
 end
 
 function obsi.draw()
-    renderbg()
-    renderPlayBtn()
-    renderSortBtn()
-    renderDiscardBtn()
-    renderMoney()
-    renderAnte()
-    renderScore()
-    renderJokers()
-    renderConsumables()
-    renderDeck()
-    renderHand()
+    render.renderbg()
+    render.renderPlayBtn()
+    render.renderSortBtn()
+    render.renderDiscardBtn()
+    render.renderMoney()
+    render.renderAnte()
+    render.renderScore()
+    render.renderJokers()
+    render.renderConsumables()
+    render.renderDeck()
+    render.renderHand()
 
     obsi.graphics.write(vars.sortMode, 10, 5, colors.white, colors.green)
-    obsi.graphics.write(vars.sortTest, 10, 6, colors.white, colors.green)
+    obsi.graphics.write(tostring(vars.sortTest), 10, 6, colors.white, colors.green)
     -- renderAllCards(currentDeck)
 end
 
