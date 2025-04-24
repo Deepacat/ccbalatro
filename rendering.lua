@@ -1,6 +1,6 @@
 local obsi = require("obsi2")
 local vars = require("vars")
-local gen = require("general")
+local util = require("util")
 local game = require("game")
 -- -- -- -- rendering functions -- -- -- --
 local render = {}

@@ -1,13 +1,14 @@
 local vars = require("vars")
-local gen = require("general")
+local util = require("util")
 -- -- -- -- game functions -- -- -- --
 local game = {}
 
+-- -- -- -- game functions -- -- -- --
 function game.resetDeck()
     vars.currentDeck = vars.fullDeck
 end
 
-game.itemObj = {
+local itemObj = {
     type = "card",
     -- default size stuff
     -- width = Card_width,
@@ -22,13 +23,13 @@ game.itemObj = {
     pickedUp = false
 }
 
-function game.itemObj:new(obj)
+function itemObj:new(obj)
     return setmetatable(obj, {
         __index = self
     })
 end
 
-game.cardObj = game.itemObj:new({
+local cardObj = itemObj:new({
     type = "card",
     bgtile = 15,
     height = 15, -- scant 2 tiles
@@ -55,30 +56,30 @@ function game.createBaseDeck()
     -- Create deck
     for x = 1, #vars.ranks do
         for y = 1, #vars.suits do
-            local cardInfo = game.cardObj:new({
+            local cardInfo = cardObj:new({
                 rank = vars.ranks[x].rank,
                 suit = vars.suits[y],
                 -- sprite_index = ranks[x].sprite_index,
                 chips = vars.ranks[x].baseChips,
                 order = vars.ranks[x].order,
             })
-            gen.add(tempBaseDeck, cardInfo)
+            util.add(tempBaseDeck, cardInfo)
         end
     end
-    return game.tempBaseDeck
+    return tempBaseDeck
 end
 
 function game.shuffleDeck(deck)
     local copyDeck = {}
     for x = 1, #deck do
-        gen.add(copyDeck, deck[x])
+        util.add(copyDeck, deck[x])
     end
     local shuffledDeck = {}
 
     for x = 1, #copyDeck do
-        local rndCard = gen.rnd(copyDeck)
-        gen.add(shuffledDeck, rndCard)
-        gen.del(copyDeck, rndCard)
+        local rndCard = util.rnd(copyDeck)
+        util.add(shuffledDeck, rndCard)
+        util.del(copyDeck, rndCard)
     end
     return shuffledDeck
 end
@@ -87,8 +88,10 @@ function game.sortBy(property, cards)
     -- insertion sort
     local tempDeck = cards
     for i = 2, #tempDeck do
+
         local currentOrder = tempDeck[i][property]
         local current = tempDeck[i]
+        
         local j = i - 1
         while (j >= 1 and currentOrder < tempDeck[j][property]) do
             tempDeck[j + 1] = tempDeck[j]
@@ -123,28 +126,22 @@ function game.sortSuit(cards)
     return sorted
 end
 
-function game.sort(cards)
-    if (vars.sortMode == "rank") then
-        return game.sortRank(cards)
-    end
-    if (vars.sortMode == "suit") then
-        return game.sortSuit(cards)
-    end
-end
-
 function game.dealHand(shuffledDeck, cardsToDeal)
     if #shuffledDeck < cardsToDeal then
-        for card in gen.all(shuffledDeck) do
-            gen.add(vars.currentHand, card)
-            gen.del(shuffledDeck, card)
+        for card in util.all(shuffledDeck) do
+            util.add(vars.currentHand, card)
+            util.del(shuffledDeck, card)
         end
     else
         for x = 1, cardsToDeal do
-            gen.add(vars.currentHand, shuffledDeck[1])
-            gen.del(shuffledDeck, shuffledDeck[1])
+            util.add(vars.currentHand, shuffledDeck[1])
+            util.del(shuffledDeck, shuffledDeck[1])
         end
     end
-    vars.currentHand = game.sort(vars.currentHand)
+    vars.currentHand = game.sortSuit(vars.currentHand)
+    -- currentHand = sortRank(currentHand)
 end
+
+-- -- -- -- end game functions -- -- -- --
 
 return game
