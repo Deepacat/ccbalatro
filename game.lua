@@ -1,7 +1,17 @@
 local util = require("util")
 local vars = require("vars")
+local obsi = require("obsi2")
 
 local game = {}
+
+-- Checks if mouse is colliding with a button
+function game.mouseCollCheck(sx, sy, sw, sh)
+    if (not obsi.mouse.isDown(1)) then return end
+    local mx = obsi.mouse.getX()
+    local my = obsi.mouse.getY()
+    return mx >= sx and mx < sx + sw and
+        my >= sy and my < sy + sh
+end
 
 function game.resetDeck()
     vars.currentDeck = vars.fullDeck
@@ -113,7 +123,6 @@ function game.sortSuit(cards)
     local sdeck = { ["S"] = {}, ["D"] = {}, ["C"] = {}, ["H"] = {} }
     local sorted = {}
     for i, v in pairs(cards) do
-        -- vars.sortTest = dump(v)
         table.insert(sdeck[v.suit[1]], v)
     end
     for i, v in pairs({ "S", "D", "C", "H" }) do

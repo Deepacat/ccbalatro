@@ -1,14 +1,13 @@
 local vars = {}
 
 -- vars
-vars.screenWidth, screenHeight = term.getSize()
+vars.screenWidth, vars.screenHeight = term.getSize()
 
 -- vars.seed = math.randomseed(42)
 
 vars.debugPrint = {}
 
 vars.sortMode = "suit"
-vars.sortTest = ""
 
 vars.ante = 1
 vars.money = 0
