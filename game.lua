@@ -6,7 +6,6 @@ local game = {}
 
 -- Checks if mouse is colliding with a button
 function game.mouseCollCheck(sx, sy, sw, sh)
-    if (not obsi.mouse.isDown(1)) then return end
     local mx = obsi.mouse.getX()
     local my = obsi.mouse.getY()
     return mx >= sx and mx < sx + sw and
@@ -154,6 +153,15 @@ function game.dealHand(shuffledDeck, cardsToDeal)
             util.add(vars.currentHand, shuffledDeck[1])
             util.del(shuffledDeck, shuffledDeck[1])
         end
+    end
+    vars.currentHand = game.sort(vars.currentHand)
+end
+
+function game.changeSortMode()
+    if (vars.sortMode == "suit") then
+        vars.sortMode = "rank"
+    else
+        vars.sortMode = "suit"
     end
     vars.currentHand = game.sort(vars.currentHand)
 end

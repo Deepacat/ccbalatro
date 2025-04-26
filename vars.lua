@@ -5,9 +5,9 @@ vars.screenWidth, vars.screenHeight = term.getSize()
 
 -- vars.seed = math.randomseed(42)
 
-vars.debugPrint = {}
+vars.gameState = "blind"
 
-vars.sortMode = "suit"
+vars.debugPrint = {}
 
 vars.ante = 1
 vars.money = 0
@@ -30,6 +30,8 @@ vars.heldConsumables = {}
 
 vars.currentHand = {}
 vars.selectedHand = {}
+
+vars.sortMode = "suit"
 
 vars.suits = { { 'H', '\3', colors.red }, { 'D', '\4', colors.orange }, { 'C', '\5', colors.blue }, { 'S', '\6', colors.black } }
 

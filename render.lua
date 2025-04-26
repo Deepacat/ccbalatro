@@ -76,7 +76,6 @@ end
 
 -- debug function to see all cards, may repurpose later for viewing deck
 function render.renderAllCards(cards)
-    -- cards = sort(cards)
     local baseXOff = 1
     local baseX = 1
     local baseY = 1
