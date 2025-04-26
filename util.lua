@@ -68,4 +68,12 @@ function util.abs(x)
     return math.abs(x)
 end
 
+function util.max(x, y)
+    return math.max(x, y)
+end
+
+function util.min(x, y)
+    return math.min(x, y)
+end
+
 return util

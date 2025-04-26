@@ -31,10 +31,27 @@ local itemObj = {
     pickedUp = false
 }
 
+game.picked_up_item = nil
 function itemObj:new(obj)
     return setmetatable(obj, {
         __index = self
     })
+end
+
+function itemObj:place(x, y, frames)
+    if util.max(0, frames) > 0 then
+        self.from_x = self.pos_x
+        self.from_y = self.pos_y
+        self.frames = frames
+    end
+    self.pos_x = x
+    self.pos_y = y
+end
+
+function itemObj:reset()
+    self.selected = false
+    self.pos_x = deck_sprite_pos_x
+    self.pos_y = deck_sprite_pos_y
 end
 
 local cardObj = itemObj:new({

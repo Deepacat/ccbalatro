@@ -14,11 +14,14 @@ end
 
 function obsi.onKeyPress(key)
     vars.debugPrint[2] = keys.getName(key)
-    if key == keys.space then -- SPACE
+    if key == keys.space then -- Space to change sorting mode
         game.changeSortMode()
     end
-    if key == keys.e then -- E
+    if key == keys.e then -- E to dealhand
         game.dealHand(vars.currentDeck, 1)
+    end
+    if key == keys.q then -- Q to quit
+        obsi.quit()
     end
 end
 
@@ -26,35 +29,37 @@ function obsi.onMousePress(x, y, button)
     vars.debugPrint[1] = x .. ", " .. y .. ", " .. button
     vars.debugPrint[3] = "clicked nothing"
 
-    if vars.gameState == "blindDeckview" then -- EXIT DECKVIEW
-        vars.gameState = "blind"
-    end
     if game.mouseCollCheck(24, 17, 3, 2) then -- SORT BUTTON
         vars.debugPrint[3] = "clicked sort"
         game.changeSortMode()
+        return
     end
     if game.mouseCollCheck(48, 14, 3, 3) then -- DECKVIEW
         vars.debugPrint[3] = "clicked deck"
         vars.gameState = "blindDeckview"
+        return
     end
     if game.mouseCollCheck(16, 17, 7, 2) then -- PLAY BUTTON
         vars.debugPrint[3] = "clicked play"
+        return
     end
     if game.mouseCollCheck(28, 17, 7, 2) then -- DISCARD BUTTON
         vars.debugPrint[3] = "clicked discard"
+        return
+    end
+    if vars.gameState == "blindDeckview" then -- EXIT DECKVIEW
+        vars.gameState = "blind"
+        return
     end
 end
 
 function obsi.update()
-    -- vars.debugPrint[1] = obsi.mouse.getX() .. ", " .. obsi.mouse.getY()
-    if obsi.keyboard.isDown("q") then
-        obsi.quit()
-    end
+
 end
 
 function obsi.draw()
     render.renderbg()
-    if vars.gameState == "blind" then
+    if vars.gameState == "blind" then -- ingame UI rendering
         render.renderPlayBtn()
         render.renderSortBtn()
         render.renderDiscardBtn()
@@ -70,8 +75,9 @@ function obsi.draw()
         obsi.graphics.write(tostring(vars.debugPrint[2]), 26, 2, colors.white, colors.black)
         obsi.graphics.write(tostring(vars.debugPrint[3]), 26, 3, colors.white, colors.black)
     end
-    if vars.gameState == "blindDeckview" then
+    if vars.gameState == "blindDeckview" then -- ingame deck view
         render.renderAllCards(game.sort(vars.currentDeck))
+        render.renderSortBtn()
     end
 end
 
