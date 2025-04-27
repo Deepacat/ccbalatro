@@ -1,5 +1,7 @@
 local obsi = require("obsi2")
 local vars = require("vars")
+local util = require("util")
+local game = require("game")
 
 local render = {}
 
@@ -47,13 +49,15 @@ end
 function render.renderJokers()
     obsi.graphics.setForegroundColor(colors.white)
     obsi.graphics.rectangle("fill", 2, 2, 3, 3)
-    obsi.graphics.write(tostring(#vars.heldJokers) .. "/" .. tostring(vars.currentMaxJokers), 2, 6, colors.white, colors.green)
+    obsi.graphics.write(tostring(#vars.heldJokers) .. "/" .. tostring(vars.currentMaxJokers), 2, 6, colors.white,
+        colors.green)
 end
 
 function render.renderConsumables()
     obsi.graphics.setForegroundColor(colors.white)
     obsi.graphics.rectangle("fill", 48, 2, 3, 3)
-    obsi.graphics.write(tostring(#vars.heldConsumables) .. "/" .. tostring(vars.currentMaxConsumables), 48, 6, colors.white,
+    obsi.graphics.write(tostring(#vars.heldConsumables) .. "/" .. tostring(vars.currentMaxConsumables), 48, 6,
+        colors.white,
         colors.green)
 end
 
@@ -76,19 +80,44 @@ end
 
 -- debug function to see all cards, may repurpose later for viewing deck
 function render.renderAllCards(cards)
-    local baseXOff = 1
-    local baseX = 1
-    local baseY = 1
-    for i = 1, #cards do
-        local cur = cards[i]
-        obsi.graphics.rectangle("fill", baseX + 3 * (baseXOff - 1), baseY, 2, 2)
-        obsi.graphics.write(tostring(cur.rank), baseX + 3 * (baseXOff - 1), baseY, cur.suit[3], colors.white)
-        obsi.graphics.write(" " .. cur.suit[2], baseX + 3 * (baseXOff - 1), baseY + 1, cur.suit[3], colors.white)
-        baseXOff = baseXOff + 1
-        if baseXOff > 16 then
-            baseXOff = 1
-            baseY = baseY + 3
+    local function drawAll(cardsToDraw, y)
+        local baseXOff = 1
+        local baseX = 2
+        local baseY = y
+        for i = 1, #cardsToDraw do
+            local cur = cardsToDraw[i]
+            obsi.graphics.rectangle("fill", baseX + 3 * (baseXOff - 1), baseY, 2, 2)
+            obsi.graphics.write(tostring(cur.rank), baseX + 3 * (baseXOff - 1), baseY, cur.suit[3], colors.white)
+            obsi.graphics.write(" " .. cur.suit[2], baseX + 3 * (baseXOff - 1), baseY + 1, cur.suit[3], colors.white)
+            baseXOff = baseXOff + 1
+            if baseXOff > 16 then
+                baseXOff = 1
+                baseY = baseY + 3
+            end
         end
+    end
+
+    if cards == "viewScreen" then
+        local cardSuits = { {}, {}, {}, {} }
+        for card in util.all(game.sort(vars.currentDeck)) do
+            if card.suit[1] == "H" then
+                util.add(cardSuits[1], card)
+            elseif card.suit[1] == "D" then
+                util.add(cardSuits[2], card)
+            elseif card.suit[1] == "C" then
+                util.add(cardSuits[3], card)
+            elseif card.suit[1] == "S" then
+                util.add(cardSuits[4], card)
+            end
+        end
+
+        drawAll(cardSuits[1], 2)
+        drawAll(cardSuits[2], 5)
+        drawAll(cardSuits[3], 8)
+        drawAll(cardSuits[4], 11)
+    end
+    if cards ~= "viewScreen" then
+        drawAll(cards, 1)
     end
 end
 

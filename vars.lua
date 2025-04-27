@@ -1,6 +1,7 @@
+local obsi = require("obsi2")
+
 local vars = {}
 
--- vars
 vars.screenWidth, vars.screenHeight = term.getSize()
 
 -- vars.seed = math.randomseed(42)

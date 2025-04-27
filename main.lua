@@ -29,23 +29,25 @@ function obsi.onMousePress(x, y, button)
     vars.debugPrint[1] = x .. ", " .. y .. ", " .. button
     vars.debugPrint[3] = "clicked nothing"
 
-    if game.mouseCollCheck(24, 17, 3, 2) then -- SORT BUTTON
-        vars.debugPrint[3] = "clicked sort"
-        game.changeSortMode()
-        return
-    end
-    if game.mouseCollCheck(48, 14, 3, 3) then -- DECKVIEW
-        vars.debugPrint[3] = "clicked deck"
-        vars.gameState = "blindDeckview"
-        return
-    end
-    if game.mouseCollCheck(16, 17, 7, 2) then -- PLAY BUTTON
-        vars.debugPrint[3] = "clicked play"
-        return
-    end
-    if game.mouseCollCheck(28, 17, 7, 2) then -- DISCARD BUTTON
-        vars.debugPrint[3] = "clicked discard"
-        return
+    if vars.gameState == "blind" then
+        if game.mouseCollCheck(24, 17, 3, 2) then -- SORT BUTTON
+            vars.debugPrint[3] = "clicked sort"
+            game.changeSortMode()
+            return
+        end
+        if game.mouseCollCheck(48, 14, 3, 3) then -- DECKVIEW
+            vars.debugPrint[3] = "clicked deck"
+            vars.gameState = "blindDeckview"
+            return
+        end
+        if game.mouseCollCheck(16, 17, 7, 2) then -- PLAY BUTTON
+            vars.debugPrint[3] = "clicked play"
+            return
+        end
+        if game.mouseCollCheck(28, 17, 7, 2) then -- DISCARD BUTTON
+            vars.debugPrint[3] = "clicked discard"
+            return
+        end
     end
     if vars.gameState == "blindDeckview" then -- EXIT DECKVIEW
         vars.gameState = "blind"
@@ -76,8 +78,7 @@ function obsi.draw()
         obsi.graphics.write(tostring(vars.debugPrint[3]), 26, 3, colors.white, colors.black)
     end
     if vars.gameState == "blindDeckview" then -- ingame deck view
-        render.renderAllCards(game.sort(vars.currentDeck))
-        render.renderSortBtn()
+        render.renderAllCards("viewScreen")
     end
 end
 

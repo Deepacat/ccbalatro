@@ -76,4 +76,15 @@ function util.min(x, y)
     return math.min(x, y)
 end
 
+-- Helpers
+function util.contains(table, value)
+	-- is there a value in a table
+    for item in util.all(table) do
+        if item == value then
+            return true
+        end
+    end
+    return false
+end
+
 return util
