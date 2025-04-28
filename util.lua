@@ -69,10 +69,12 @@ function util.abs(x)
 end
 
 function util.max(x, y)
+    if x == nil or y == nil then return 0 end
     return math.max(x, y)
 end
 
 function util.min(x, y)
+    if x == nil or y == nil then return 0 end
     return math.min(x, y)
 end
 

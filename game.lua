@@ -4,12 +4,80 @@ local obsi = require("obsi2")
 
 local game = {}
 
+function game.distributeHand()
+    local x = util.flr(vars.screenWidth / 2 + 1) - util.flr(#vars.currentHand * 3 / 2)
+    local y = 14
+    for card in util.all(vars.currentHand) do
+        if card.selected then
+            card:place(x, y - 1, 5)
+        else
+            card:place(x, y, 5)
+        end
+        x = x + card.width + 1
+    end
+end
+
+function game.drawHand()
+    if vars.initDraw then
+        game.distributeHand()
+        -- vars.initDraw = false
+    end
+    for i = 1, #vars.currentHand do
+        vars.currentHand[i]:draw()
+    end
+end
+
+-- called when mouse-down to
+-- check if card picked up
+function game.handCollDown()
+    for card in util.all(vars.currentHand) do
+        if card:moused() then
+            -- card:pickup()
+            -- card.drop_at = game.handCollUp
+            return card
+        end
+    end
+end
+
+-- drop a dragged card or click
+function game.handCollUp(self, px, py)
+    local my = obsi.mouse.getY()
+    if (self.pickedUp.moved) then
+        if py < 50 or my > 102 then
+            return
+        end
+        self.posx = px
+        self.posy = py
+        game.sortByX(vars.currentHand)
+        game.distributeHand()
+    else -- click, not drop
+        -- select_hand(self)
+        -- update_selected_cards()
+    end
+end
+
 -- Checks if mouse is colliding with a button
 function game.mouseCollCheck(sx, sy, sw, sh)
     local mx = obsi.mouse.getX()
     local my = obsi.mouse.getY()
     return mx >= sx and mx < sx + sw and
         my >= sy and my < sy + sh
+end
+
+function game.selectHand(card)
+    if card.selected == false and vars.selectedCount < vars.maxSelected then
+        card.selected = true
+        vars.selectedCount = vars.selectedCount + 1
+        card:place(card.posx, card.posy - 1, 5)
+    elseif card.selected == true then
+        card.selected = false
+        vars.selectedCount = vars.selectedCount - 1
+        card:place(card.posx, card.posy + 1, 5)
+    --     if vars.selectedCount == 4 then error_message = "" end
+    -- else
+    --     sfx(sfx_error_message)
+    --     error_message = "You can only select 5 \ncards at a time"
+    end
 end
 
 function game.resetDeck()
@@ -39,11 +107,11 @@ function itemObj:new(obj)
 end
 
 function itemObj:place(x, y, frames)
-    if util.max(0, frames) > 0 then
-        self.fromx = self.posx
-        self.fromy = self.posy
-        self.frames = frames
-    end
+    -- if util.max(0, frames) > 0 then
+    self.fromx = self.posx
+    self.fromy = self.posy
+    self.frames = frames
+    -- end
     self.posx = x
     self.posy = y
 end
@@ -56,19 +124,20 @@ end
 
 function itemObj:draw()
     if (game.pickedUpItem == self) then return end
-    -- animation
-    if self.frames > 0 then
-        self.frames = self.frames - 1
-        if self.frames == 0 then
-            self.fromx = nil
-            self.fromy = nil
-        else
-            self.fromx = self.fromx + (self.posx - self.fromx) / self.frames
-            self.fromy = self.fromy + (self.posy - self.fromy) / self.frames
-            self:drawAt(self.fromx, self.fromy)
-            return
-        end
-    end
+    -- -- animation
+    -- if self.frames > 0 then
+    --     self.frames = self.frames - 1
+    --     if self.frames == 0 then
+    --         self.fromx = nil
+    --         self.fromy = nil
+    --     else
+    --         self.fromx = self.fromx + (self.posx - self.fromx) / self.frames
+    --         self.fromy = self.fromy + (self.posy - self.fromy) / self.frames
+    --         self:drawAt(self.fromx, self.fromy)
+    --         return
+    --     end
+    -- end
+
     -- no animation
     self:drawAt(self.posx, self.posy)
 end
@@ -86,7 +155,8 @@ function itemObj:moused(morex, morey)
         self.posx,
         self.posy,
         self.width + morex,
-        self.height + morey)
+        self.height + morey
+    )
 end
 
 -- called when mouse is clicked
@@ -143,8 +213,7 @@ function itemObj:dropAt(px, py)
 end
 
 -- utility functions
-local function doNothing()
-end
+local function doNothing() end
 
 -- playing cards
 local cardObj = itemObj:new({
@@ -156,10 +225,10 @@ local cardObj = itemObj:new({
     mult = 0,
     posx = 0,
     posy = 0,
-    when_held_in_hand = doNothing,
-    when_held_at_end = doNothing,
+    whenHeldInHand = doNothing,
+    whenHeldAtEnd = doNothing,
     effect = doNothing,
-    card_effect = doNothing
+    cardEffect = doNothing
 })
 
 -- function cardObj:reset()
@@ -169,67 +238,73 @@ local cardObj = itemObj:new({
 -- end
 
 -- DEAR GOD OH MY PICO API
-function cardObj:draw_at(x, y)
-    pal()
-    rectfill(x - 1, y - 1, x - 2 + self.width, y - 2 + self.height, 0)
-    palt(11, true)
-    pal(8, suit_colors[self.suit])
-    spr(self.bgtile, x, y, 1, 2)
-    -- overlay rank
-    spr(self.sprite_index, x, y)
-    -- if not wild, overlay suit
-    if self.bgtile ~= 44 then
-        spr(suit_sprites[self.suit], x, y + 8)
-    end
-    pal()
+---@diagnostic disable-next-line: duplicate-set-field
+function cardObj:drawAt(x, y)
+    obsi.graphics.setForegroundColor(colors.white)
+    obsi.graphics.rectangle("fill", x, y, self.width, self.height)
+    obsi.graphics.write(tostring(self.rank), x, y, self.suit[3], colors.white)
+    obsi.graphics.write(" " .. self.suit[2], x, y + 1, self.suit[3], colors.white)
+
+    -- 	pal()
+    -- 	rectfill(x-1,y-1,x-2+self.width,y-2+self.height,0)
+    -- 	palt(11,true)
+    -- 	pal(8,suit_colors[self.suit])
+    -- 	spr(self.bgtile,x,y,1,2)
+    -- 	-- overlay rank
+    -- 	spr(self.sprite_index, x, y)
+    -- 	-- if not wild, overlay suit
+    --  if self.bgtile != 44 then
+    -- 		spr(suit_sprites[self.suit],x,y+8)
+    -- 	end
+    -- 	pal()
 end
 
-function cardObj:draw_at_mouse()
+function cardObj:drawAtMouse()
     local mx = obsi.mouse.getX()
     local my = obsi.mouse.getY()
-    if (not self.picked_up) then return end
-    self:draw_at(
-        mx - self.picked_up.offx,
-        my - self.picked_up.offy
+    if (not self.pickedUp) then return end
+    self:drawAt(
+        mx - self.pickedUp.offx,
+        my - self.pickedUp.offy
     )
 end
 
 -- rank moving
-function cardObj:set_rank_by_order(o)
+function cardObj:setRankByOrder(o)
     for r in util.all(vars.ranks) do
         if r.order == o then
-            return self:set_rank(r)
+            return self:setRank(r)
         end
     end
     assert(false) -- rank not found
 end
 
-function cardObj:set_rank(r)
+function cardObj:setRank(r)
     self.rank = r.rank
-    self.sprite_index = r.sprite_index
+    -- self.sprite_index = r.sprite_index
     self.order = r.order
-    self.chips = r.base_chips
+    self.chips = r.baseChips
 end
 
-function cardObj:plus_order(d)
+function cardObj:plusOrder(d)
     return ((self.order - d - 1) % 13) + 1
 end
 
-function cardObj:add_rank(d)
-    local newOrder = self:plus_order(d)
-    self:set_rank_by_order(newOrder)
+function cardObj:addRank(d)
+    local newOrder = self:plusOrder(d)
+    self:setRankByOrder(newOrder)
 end
 
 function game.hasJoker(name)
-	for j in util.all(vars.heldJokers) do
-		if(j.name==name) then return j end
-	end
-	return false
+    for j in util.all(vars.heldJokers) do
+        if (j.name == name) then return j end
+    end
+    return false
 end
 
-function cardObj:is_face()
+function cardObj:isFace()
     if (game.hasJoker('pareidolia')) then return true end
-    return util.contains({ 'k', 'j', 'q' }, self.rank)
+    return util.contains({ 'K', 'J', 'Q' }, self.rank)
 end
 
 function cardObj:matches_suit(other)
@@ -243,10 +318,10 @@ function cardObj:is_suit(target)
     -- 44=wild card
     if (self.bgtile == 44) then return true end
     if game.hasJoker('smeared joker') then
-        if target == 's' or target == 'c' then
-            return self.suit == 's' or self.suit == 'c'
+        if target == 's' or target == 'C' then
+            return self.suit == 'S' or self.suit == 'C'
         else
-            return self.suit == 'd' or self.suit == 'h'
+            return self.suit == 'D' or self.suit == 'H'
         end
     end
     return self.suit == target

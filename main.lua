@@ -30,6 +30,10 @@ function obsi.onMousePress(x, y, button)
     vars.debugPrint[3] = "clicked nothing"
 
     if vars.gameState == "blind" then
+        if game.handCollDown() then
+            game.selectHand(game.handCollDown())
+            vars.debugPrint[3] = "clicked card"
+        end
         if game.mouseCollCheck(24, 17, 3, 2) then -- SORT BUTTON
             vars.debugPrint[3] = "clicked sort"
             game.changeSortMode()
@@ -62,6 +66,7 @@ end
 function obsi.draw()
     render.renderbg()
     if vars.gameState == "blind" then -- ingame UI rendering
+        game.drawHand()
         render.renderPlayBtn()
         render.renderSortBtn()
         render.renderDiscardBtn()
@@ -71,11 +76,16 @@ function obsi.draw()
         render.renderJokers()
         render.renderConsumables()
         render.renderDeck()
-        render.renderHand()
+        -- render.renderHand()
 
         obsi.graphics.write(tostring(vars.debugPrint[1]), 26, 1, colors.white, colors.black)
         obsi.graphics.write(tostring(vars.debugPrint[2]), 26, 2, colors.white, colors.black)
         obsi.graphics.write(tostring(vars.debugPrint[3]), 26, 3, colors.white, colors.black)
+        obsi.graphics.write(tostring(vars.debugPrint[4]), 26, 4, colors.white, colors.black)
+        obsi.graphics.write(tostring(vars.currentHand[1].posx .. ", " .. vars.currentHand[1].posy), 26, 5, colors.white,
+            colors.black)
+        obsi.graphics.write(tostring(vars.currentHand[2].posx .. ", " .. vars.currentHand[1].posy), 26, 6, colors.white,
+            colors.black)
     end
     if vars.gameState == "blindDeckview" then -- ingame deck view
         render.renderAllCards("viewScreen")

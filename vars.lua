@@ -6,46 +6,40 @@ vars.screenWidth, vars.screenHeight = term.getSize()
 
 -- vars.seed = math.randomseed(42)
 
-vars.gameState = "blind"
 
 vars.debugPrint = {}
 
+-- game
+vars.gameState = "blind"
+vars.initDraw = true
 vars.ante = 1
 vars.money = 0
+vars.blindReq = 300
 
+-- cards
 vars.handSize = 8
 vars.handsLeft = 4
 vars.discardsLeft = 3
 vars.maxHands = 4
+vars.maxSelected = 5
+vars.selectedCount = 0
 vars.maxDiscards = 3
 
-vars.curChips = 0
-vars.curMult = 0
-vars.totalScore = 0
-vars.blindReq = 300
-
+-- Jokers
 vars.currentMaxJokers = 5
 vars.currentMaxConsumables = 2
 vars.heldJokers = {}
 vars.heldConsumables = {}
 
+-- Hand
 vars.currentHand = {}
 vars.selectedHand = {}
-
 vars.sortMode = "suit"
 
-vars.suits = { { 'H', '\3', colors.red }, { 'D', '\4', colors.orange }, { 'C', '\5', colors.blue }, { 'S', '\6', colors.black } }
-
-vars.fullDeck = {
-    "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "JH", "KH", "QH", "AH",
-    "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "JD", "KD", "QD", "AD",
-    "1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "JS", "KS", "QS", "AS",
-    "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "JC", "KC", "QC", "AC",
-}
-
-vars.currentDeck = {}
-vars.baseDeck = {}
-
+-- Card props
+vars.curChips = 0
+vars.curMult = 0
+vars.totalScore = 0
 vars.ranks = {
     { rank = 'A', baseChips = 11 }, { rank = 'K', baseChips = 10 }, { rank = 'Q', baseChips = 10 },
     { rank = 'J', baseChips = 10 }, { rank = '10', baseChips = 10 }, { rank = '9', baseChips = 9 },
@@ -53,7 +47,17 @@ vars.ranks = {
     { rank = '5', baseChips = 5 }, { rank = '4', baseChips = 4 }, { rank = '3', baseChips = 3 },
     { rank = '2', baseChips = 2 },
 }
+vars.suits = { { 'H', '\3', colors.red }, { 'D', '\4', colors.orange }, { 'C', '\5', colors.blue }, { 'S', '\6', colors.black } }
 
+-- Deck
+vars.fullDeck = {
+    "1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "JH", "KH", "QH", "AH",
+    "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "JD", "KD", "QD", "AD",
+    "1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "JS", "KS", "QS", "AS",
+    "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "JC", "KC", "QC", "AC",
+}
+vars.currentDeck = {}
+vars.baseDeck = {}
 vars.handTypes = {
     ["Flush Five"] = { baseChips = 160, baseMult = 16, level = 1 },
     ["Flush House"] = { baseChips = 140, baseMult = 14, level = 1 },
