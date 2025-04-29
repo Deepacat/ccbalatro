@@ -75,12 +75,12 @@ function game.discardBtnClicked()
         for card in util.all(vars.selectedCards) do
             vars.debugPrint[4] = (vars.debugPrint[4] .. card.suit[2] .. card.rank .. ", ")
             util.del(vars.currentHand, card)
-            util.del(vars.selectedCards, card)
         end
-        -- game.dealHand(vars.currentDeck, vars.selectedCount)
-        -- vars.init_draw = true
-        -- vars.selectedCount = 0
-        -- vars.discardsLeft = vars.discardsLeft - 1
+        vars.selectedCards = {}
+        game.dealHand(vars.currentDeck, vars.selectedCount)
+        vars.init_draw = false
+        vars.selectedCount = 0
+        vars.discardsLeft = vars.discardsLeft - 1
         -- error_message = ""
     end
 end

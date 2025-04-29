@@ -45,10 +45,9 @@ end
 -- iterator in for loops to iterate over items in order they were added, similar to ipairs without key
 function util.all(t)
     local i = 0
-    local n = #t
     return function()
         i = i + 1
-        if i <= n then return t[i] end
+        return t[i]
     end
 end
 
@@ -80,7 +79,7 @@ end
 
 -- Helpers
 function util.contains(table, value)
-	-- is there a value in a table
+    -- is there a value in a table
     for item in util.all(table) do
         if item == value then
             return true
