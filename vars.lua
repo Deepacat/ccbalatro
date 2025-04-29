@@ -13,15 +13,18 @@ vars.debugPrint = {}
 vars.gameState = "blind"
 vars.initDraw = true
 vars.ante = 1
-vars.money = 0
-vars.blindReq = 300
+vars.money = 4
+vars.blindGoal = 300
+vars.curChips = 0
+vars.curMult = 0
+vars.totalScore = 0
 
 -- cards
 vars.handSize = 8
 vars.handsLeft = 4
-vars.discardsLeft = 3
+vars.discardsLeft = 30
 vars.maxHands = 4
-vars.maxSelected = 5
+vars.maxSelected = 30
 vars.selectedCount = 0
 vars.maxDiscards = 3
 
@@ -31,15 +34,14 @@ vars.currentMaxConsumables = 2
 vars.heldJokers = {}
 vars.heldConsumables = {}
 
--- Hand
+-- Game hand
+vars.handTypeText = ""
 vars.currentHand = {}
-vars.selectedHand = {}
+vars.selectedCards = {}
 vars.sortMode = "suit"
+vars.scoredCards = {}
 
 -- Card props
-vars.curChips = 0
-vars.curMult = 0
-vars.totalScore = 0
 vars.ranks = {
     { rank = 'A', baseChips = 11 }, { rank = 'K', baseChips = 10 }, { rank = 'Q', baseChips = 10 },
     { rank = 'J', baseChips = 10 }, { rank = '10', baseChips = 10 }, { rank = '9', baseChips = 9 },

@@ -33,7 +33,7 @@ function game.handCollDown()
     for card in util.all(vars.currentHand) do
         if card:moused() then
             -- card:pickup()
-            -- card.drop_at = game.handCollUp
+            card.drop_at = game.handCollUp
             return card
         end
     end
@@ -43,16 +43,17 @@ end
 function game.handCollUp(self, px, py)
     local my = obsi.mouse.getY()
     if (self.pickedUp.moved) then
-        if py < 50 or my > 102 then
-            return
-        end
-        self.posx = px
-        self.posy = py
-        game.sortByX(vars.currentHand)
-        game.distributeHand()
-    else -- click, not drop
-        -- select_hand(self)
-        -- update_selected_cards()
+    --     if py < 50 or my > 102 then
+    --         return
+    --     end
+    --     self.posx = px
+    --     self.posy = py
+    --     game.sortByX(vars.currentHand)
+    --     game.distributeHand()
+    -- else -- click, not drop
+    --     game.selectHand(self)
+    --     game.updateSelectedCards()
+    return
     end
 end
 
@@ -64,6 +65,199 @@ function game.mouseCollCheck(sx, sy, sw, sh)
         my >= sy and my < sy + sh
 end
 
+function game.discardBtnClicked()
+    if not game.mouseCollCheck(28, 17, 7, 2) then return end
+    vars.debugPrint[4] = ""
+    vars.debugPrint[3] = "clicked discard"
+    if #vars.selectedCards > 0 and vars.discardsLeft > 0 then
+        vars.debugPrint[3] = "discarded"
+        -- sfx(sfx_discard_btn_clicked)
+        for card in util.all(vars.selectedCards) do
+            vars.debugPrint[4] = (vars.debugPrint[4] .. card.suit[2] .. card.rank .. ", ")
+            util.del(vars.currentHand, card)
+            util.del(vars.selectedCards, card)
+        end
+        -- game.dealHand(vars.currentDeck, vars.selectedCount)
+        -- vars.init_draw = true
+        -- vars.selectedCount = 0
+        -- vars.discardsLeft = vars.discardsLeft - 1
+        -- error_message = ""
+    end
+end
+
+function game.containsFlush(cards)
+    local run_goal = 5
+    -- if(has_joker("four fingers")) then run_goal=4 end
+    if (#cards < run_goal) then return end
+    local first = cards[1]
+    local ct = 0
+    for card in util.all(cards) do
+        if (card:matches_suit(first)) then ct = ct + 1 end
+        if (ct >= run_goal) then return true end
+    end
+    return false
+end
+
+function game.containsRoyal(cards)
+    -- only called if straight is
+    -- already detected, so just
+    -- return false if any
+    -- commoners present
+    local royals = { 'A', 'K', 'Q', 'J', '10' }
+    for c in util.all(cards) do
+        if (not util.contains(royals, c.rank)) then return false end
+    end
+    return true
+end
+
+function game.containsStraight(cf)
+    -- todo: implement shortcut joker
+    local runGold = 5
+    -- if(has_joker("four fingers"))run_goal=4
+    if #vars.selectedCards < runGold then
+        return false
+    end
+    local runLength = 0
+    -- detect run
+    for f in util.all(cf) do
+        if f > 0 then
+            runLength = runLength + 1
+            if runLength >= runGold then
+                return true
+            end
+        else
+            runLength = 0
+        end
+    end
+    -- special case for a,2,3,4,5
+    if runLength == runGold - 1
+        and cf[1] > 0 then
+        return true
+    end
+    -- insufficient run
+    return false
+end
+
+-- hand detection
+
+-- collect card frequencies to
+-- detect matches and runs.
+-- indexed by card.order as a
+-- numeric proxy for rank.
+function game.cardFrequencies()
+    local histogram = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    for card in util.all(vars.selectedCards) do
+        histogram[card.order] = histogram[card.order] + 1
+    end
+    return histogram
+end
+
+function game.addAllCardsToScore(cards)
+    for card in util.all(cards) do
+        util.add(vars.scoredCards, card)
+    end
+end
+
+function game.scoreCardsOfOrder(o)
+    for card in util.all(vars.selectedCards) do
+        if (card.order == o) then util.add(vars.scoredCards, card) end
+    end
+end
+
+function game.scoreCardsOfCount(cf, qty)
+    for i, q in pairs(cf) do
+        if (q == qty) then game.scoreCardsOfOrder(i) end
+    end
+end
+
+function game.getHighestSelected()
+    local min_order = 99
+    local result = nil
+    for card in util.all(vars.selectedCards) do
+        if card.order < min_order then
+            result = card
+            min_order = card.order
+        end
+    end
+    return result
+end
+
+function game.checkHandType()
+    vars.scoredCards = {}
+    if #vars.selectedCards == 0 then
+        vars.handTypeText = ""
+        return "none"
+    end
+    local flush = false
+    if #vars.selectedCards >= 4 then
+        flush = game.containsFlush(vars.selectedCards)
+    end
+    local cf = game.cardFrequencies()
+    if flush then
+        game.addAllCardsToScore(vars.selectedCards)
+        if util.count(cf, 5) > 0 then
+            return "Flush Five"
+        elseif util.count(cf, 3) > 0 and util.count(cf, 2) > 0 then
+            return "Flush House"
+        elseif game.containsStraight(cf) then
+            if game.containsRoyal(vars.currentHand) then
+                return "Royal Flush"
+            else
+                return "Straight Flush"
+            end
+        end
+        return "Flush"
+    end
+    --non-flush decision tree
+    if util.count(cf, 5) > 0 then
+        game.addAllCardsToScore(vars.selectedCards)
+        return "Five of a Kind"
+    elseif util.count(cf, 4) > 0 then
+        game.scoreCardsOfCount(cf, 4)
+        return "Four of a Kind"
+    elseif util.count(cf, 3) > 0 then
+        game.scoreCardsOfCount(cf, 3)
+        if util.count(cf, 2) > 0 then
+            game.scoreCardsOfCount(cf, 2)
+            return "Full House"
+        end
+        return "Three of a Kind"
+    elseif game.containsStraight(cf) then
+        game.addAllCardsToScore(vars.selectedCards)
+        return "Straight"
+    elseif util.count(cf, 2) > 0 then
+        game.scoreCardsOfCount(cf, 2)
+        if util.count(cf, 2) > 1 then
+            return "Two Pair"
+        end
+        return "Pair"
+    end
+    -- high card is all that's left
+    util.add(vars.scoredCards, game.getHighestSelected())
+    return "High Card"
+end
+
+function game.updateSelectedCards()
+    vars.debugPrint[5] = ""
+    for card in util.all(vars.currentHand) do
+        if card.selected and not util.contains(vars.selectedCards, card) then
+            vars.debugPrint[5] = (vars.debugPrint[5] .. card.suit[2] .. card.rank .. ", ")
+            util.add(vars.selectedCards, card)
+        elseif not card.selected and util.contains(vars.selectedCards, card) then
+            -- vars.debugPrint[6] = (vars.debugPrint[6] .. card.suit[2] .. card.rank .. ", ")
+            util.del(vars.selectedCards, card)
+        end
+    end
+    local handType = game.checkHandType()
+    if handType ~= "none" then
+        -- vars.handTypeText = handType
+        -- vars.chips = 0
+        -- vars.mult = 0
+        -- vars.chips = vars.chips + vars.handTypes[handType].baseChips
+        -- vars.mult = vars.mult + vars.handTypes[handType].baseMult
+    end
+end
+
 function game.selectHand(card)
     if card.selected == false and vars.selectedCount < vars.maxSelected then
         card.selected = true
@@ -73,10 +267,10 @@ function game.selectHand(card)
         card.selected = false
         vars.selectedCount = vars.selectedCount - 1
         card:place(card.posx, card.posy + 1, 5)
-    --     if vars.selectedCount == 4 then error_message = "" end
-    -- else
-    --     sfx(sfx_error_message)
-    --     error_message = "You can only select 5 \ncards at a time"
+        --     if vars.selectedCount == 4 then error_message = "" end
+        -- else
+        --     sfx(sfx_error_message)
+        --     error_message = "You can only select 5 \ncards at a time"
     end
 end
 
@@ -230,12 +424,6 @@ local cardObj = itemObj:new({
     effect = doNothing,
     cardEffect = doNothing
 })
-
--- function cardObj:reset()
--- 	self.selected=false
--- 	self.pos_x=0
--- 	self.pos_y=0
--- end
 
 -- DEAR GOD OH MY PICO API
 ---@diagnostic disable-next-line: duplicate-set-field
