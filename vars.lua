@@ -38,7 +38,7 @@ vars.heldConsumables = {}
 vars.handTypeText = ""
 vars.currentHand = {}
 vars.selectedCards = {}
-vars.sortMode = "suit"
+vars.sortMode = "rank"
 vars.scoredCards = {}
 
 -- Card props

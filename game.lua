@@ -168,7 +168,7 @@ end
 function game.containsFlush(cards)
     local run_goal = 5
     -- if(has_joker("four fingers")) then run_goal=4 end
-    if (#cards < run_goal) then return end
+    if (#cards < run_goal) then return false end
     local first = cards[1]
     local ct = 0
     for card in util.all(cards) do
@@ -333,6 +333,16 @@ function game.updateSelectedCards()
         vars.curChips = vars.curChips + vars.handTypes[handType].baseChips
         vars.curMult = vars.curMult + vars.handTypes[handType].baseMult
     end
+end
+
+function game.deselectAllCards()
+    for card in util.all(vars.selectedCards) do
+        game.selectHand(card)
+    end
+    vars.selectedCards = {}
+    vars.curChips = 0
+    vars.curMult = 0
+    vars.handTypeText = ""
 end
 
 function game.selectHand(card)

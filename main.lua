@@ -28,30 +28,36 @@ end
 function obsi.onMousePress(x, y, button)
     vars.debugPrint[1] = x .. ", " .. y .. ", " .. button
     vars.debugPrint[3] = "clicked nothing"
-
-    -- in game click checks
-    if vars.gameState == "blind" then
-        game.discardBtnClicked() -- DISCARD BUTTON
-        game.playBtnClicked() -- PLAY BUTTON
-        if game.handCollDown() then
-            game.selectHand(game.handCollDown())
-            game.updateSelectedCards()
-            vars.debugPrint[3] = "clicked card"
+    if button == 1 then
+        -- in game click checks
+        if vars.gameState == "blind" then
+            game.discardBtnClicked() -- DISCARD BUTTON
+            game.playBtnClicked()    -- PLAY BUTTON
+            if game.handCollDown() then
+                game.selectHand(game.handCollDown())
+                game.updateSelectedCards()
+                vars.debugPrint[3] = "clicked card"
+            end
+            if game.mouseCollCheck(24, 17, 3, 2) then -- SORT BUTTON
+                vars.debugPrint[3] = "clicked sort"
+                game.changeSortMode()
+                return
+            end
+            if game.mouseCollCheck(48, 14, 3, 3) then -- DECKVIEW
+                vars.debugPrint[3] = "clicked deck"
+                vars.gameState = "blindDeckview"
+                return
+            end
         end
-        if game.mouseCollCheck(24, 17, 3, 2) then -- SORT BUTTON
-            vars.debugPrint[3] = "clicked sort"
-            game.changeSortMode()
-            return
-        end
-        if game.mouseCollCheck(48, 14, 3, 3) then -- DECKVIEW
-            vars.debugPrint[3] = "clicked deck"
-            vars.gameState = "blindDeckview"
+        if vars.gameState == "blindDeckview" then -- EXIT DECKVIEW
+            vars.gameState = "blind"
             return
         end
     end
-    if vars.gameState == "blindDeckview" then -- EXIT DECKVIEW
-        vars.gameState = "blind"
-        return
+    if button == 2 then
+        if vars. gameState == "blind" then
+            game.deselectAllCards()
+        end
     end
 end
 
@@ -76,7 +82,6 @@ function obsi.draw()
         obsi.graphics.write(tostring(vars.debugPrint[1]), 26, 1, colors.white, colors.black)
         obsi.graphics.write(tostring(vars.debugPrint[2]), 26, 2, colors.white, colors.black)
         obsi.graphics.write(tostring(vars.debugPrint[3]), 26, 3, colors.white, colors.black)
-
     end
     if vars.gameState == "blindDeckview" then -- ingame deck view
         render.renderAllCards("viewScreen")
