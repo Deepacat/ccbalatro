@@ -126,7 +126,7 @@ end
 function game.finishScoringHand()
     if vars.currentScore >= (vars.blindGoal) then
         -- win_state()
-        -- in_shop = true
+        -- vars.gameState = "shop"
     else
         for card in util.all(vars.selectedCards) do
             util.del(vars.currentHand, card)
@@ -192,9 +192,9 @@ end
 
 function game.containsStraight(cf)
     -- todo: implement shortcut joker
-    local runGold = 5
+    local runGoal = 5
     -- if(has_joker("four fingers"))run_goal=4
-    if #vars.selectedCards < runGold then
+    if #vars.selectedCards < runGoal then
         return false
     end
     local runLength = 0
@@ -202,7 +202,7 @@ function game.containsStraight(cf)
     for f in util.all(cf) do
         if f > 0 then
             runLength = runLength + 1
-            if runLength >= runGold then
+            if runLength >= runGoal then
                 return true
             end
         else
@@ -210,7 +210,7 @@ function game.containsStraight(cf)
         end
     end
     -- special case for a,2,3,4,5
-    if runLength == runGold - 1
+    if runLength == runGoal - 1
         and cf[1] > 0 then
         return true
     end
@@ -266,7 +266,7 @@ function game.checkHandType()
     vars.scoredCards = {}
     if #vars.selectedCards == 0 then
         vars.handTypeText = ""
-        return "none"
+        return "None"
     end
     local flush = false
     if #vars.selectedCards >= 4 then
@@ -325,13 +325,13 @@ function game.updateSelectedCards()
             util.del(vars.selectedCards, card)
         end
     end
-    local handType = game.checkHandType()
-    if handType ~= "none" then
-        vars.handTypeText = handType
+    vars.handType = game.checkHandType()
+    if vars.handType ~= "None" then
+        vars.handTypeText = vars.handType
         vars.curChips = 0
         vars.curMult = 0
-        vars.curChips = vars.curChips + vars.handTypes[handType].baseChips
-        vars.curMult = vars.curMult + vars.handTypes[handType].baseMult
+        vars.curChips = vars.curChips + vars.handTypes[vars.handType].baseChips
+        vars.curMult = vars.curMult + vars.handTypes[vars.handType].baseMult
     end
 end
 
