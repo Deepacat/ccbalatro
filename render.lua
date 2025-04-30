@@ -13,7 +13,7 @@ function render.renderScore()
     obsi.graphics.write(tostring(vars.curChips), 2, 10, colors.white, colors.blue)
     obsi.graphics.write("x", 2 + #tostring(vars.curChips), 10, colors.white, colors.green)
     obsi.graphics.write(tostring(vars.curMult), 3 + #tostring(vars.curChips), 10, colors.white, colors.red)
-    obsi.graphics.write(vars.currentScore .. "/", 2, 11, colors.white, colors.green)
+    obsi.graphics.write(tostring(vars.currentScore), 2, 11, colors.white, colors.green)
     obsi.graphics.write(tostring(vars.blindGoal), 2, 12, colors.white, colors.green)
 end
 

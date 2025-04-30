@@ -20,7 +20,8 @@ end
 function game.drawHand()
     if vars.initDraw then
         game.distributeHand()
-        vars.initDraw = false
+        -- making initdraw false and not running distribute makes all cards render at 0,0 for some reason
+        -- vars.initDraw = false
     end
     for i = 1, #vars.currentHand do
         vars.currentHand[i]:draw()
@@ -43,17 +44,17 @@ end
 function game.handCollUp(self, px, py)
     local my = obsi.mouse.getY()
     if (self.pickedUp.moved) then
-    --     if py < 50 or my > 102 then
-    --         return
-    --     end
-    --     self.posx = px
-    --     self.posy = py
-    --     game.sortByX(vars.currentHand)
-    --     game.distributeHand()
-    -- else -- click, not drop
-    --     game.selectHand(self)
-    --     game.updateSelectedCards()
-    return
+        --     if py < 50 or my > 102 then
+        --         return
+        --     end
+        --     self.posx = px
+        --     self.posy = py
+        --     game.sortByX(vars.currentHand)
+        --     game.distributeHand()
+        -- else -- click, not drop
+        --     game.selectHand(self)
+        --     game.updateSelectedCards()
+        return
     end
 end
 
@@ -76,18 +77,14 @@ end
 
 function game.discardBtnClicked()
     if not game.mouseCollCheck(28, 17, 7, 2) then return end
-    vars.debugPrint[4] = ""
-    vars.debugPrint[3] = "clicked discard"
     if #vars.selectedCards > 0 and vars.discardsLeft > 0 then
-        vars.debugPrint[3] = "discarded"
         -- sfx(sfx_discard_btn_clicked)
         for card in util.all(vars.selectedCards) do
-            vars.debugPrint[4] = (vars.debugPrint[4] .. card.suit[2] .. card.rank .. ", ")
             util.del(vars.currentHand, card)
         end
         game.dealHand(vars.currentDeck, vars.selectedCount)
         vars.selectedCards = {}
-        vars.initDraw = false
+        -- vars.initDraw = false
         vars.selectedCount = 0
         vars.discardsLeft = vars.discardsLeft - 1
         -- error_message = ""
@@ -95,35 +92,35 @@ function game.discardBtnClicked()
 end
 
 function game.addMoney(i, card)
-	if(i == 0) then return end
-	vars.money = vars.money + i
-	-- sfx(sfx_add_money)
-	-- add_sparkle(35,card)
-	-- pause(7)
+    if (i == 0) then return end
+    vars.money = vars.money + i
+    -- sfx(sfx_add_money)
+    -- add_sparkle(35,card)
+    -- pause(7)
 end
 
 function game.multiplyMult(i, card)
-	if(i == 0) then return end
-	vars.curMult = vars.curMult* i
-	-- sfx(sfx_multiply_mult)
-	-- add_sparkle(34,card)
-	-- pause(7)
+    if (i == 0) then return end
+    vars.curMult = vars.curMult * i
+    -- sfx(sfx_multiply_mult)
+    -- add_sparkle(34,card)
+    -- pause(7)
 end
 
 function game.addMult(i, card)
-	if(i == 0) then return end
-	vars.curChips = vars.curMult + i
-	-- sfx(sfx_add_mult)
-	-- add_sparkle(33,card)
-	-- pause(5)
+    if (i == 0) then return end
+    vars.curMult = vars.curMult + i
+    -- sfx(sfx_add_mult)
+    -- add_sparkle(33,card)
+    -- pause(5)
 end
 
 function game.addChips(i, card)
-	if(i == 0) then return end
-	vars.curChips = vars.curMult + i
-	-- sfx(sfx_add_chips)
-	-- add_sparkle(32,card)
-	-- pause(5)
+    if (i == 0) then return end
+    vars.curChips = vars.curChips + i
+    -- sfx(sfx_add_chips)
+    -- add_sparkle(32,card)
+    -- pause(5)
 end
 
 function game.finishScoringHand()
@@ -132,13 +129,13 @@ function game.finishScoringHand()
         -- in_shop = true
     else
         for card in util.all(vars.selectedCards) do
-            util.del(vars.currentHand, card)	
+            util.del(vars.currentHand, card)
         end
         vars.selectedCards = {}
         game.dealHand(vars.currentDeck, vars.selectedCount)
         vars.initDraw = true
         vars.selectedCount = 0
-        vars.scoredCards= {}
+        vars.scoredCards = {}
         -- error_message = ""
         if vars.handsLeft == 0 then
             -- lose_state()
@@ -321,13 +318,10 @@ function game.checkHandType()
 end
 
 function game.updateSelectedCards()
-    vars.debugPrint[5] = ""
     for card in util.all(vars.currentHand) do
         if card.selected and not util.contains(vars.selectedCards, card) then
-            vars.debugPrint[5] = (vars.debugPrint[5] .. card.suit[2] .. card.rank .. ", ")
             util.add(vars.selectedCards, card)
         elseif not card.selected and util.contains(vars.selectedCards, card) then
-            -- vars.debugPrint[6] = (vars.debugPrint[6] .. card.suit[2] .. card.rank .. ", ")
             util.del(vars.selectedCards, card)
         end
     end
@@ -387,7 +381,7 @@ function itemObj:place(x, y, frames)
     -- if util.max(0, frames) > 0 then
     self.fromx = self.posx
     self.fromy = self.posy
-    self.frames = frames
+    -- self.frames = frames
     -- end
     self.posx = x
     self.posy = y

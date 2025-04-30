@@ -76,11 +76,6 @@ function obsi.draw()
         obsi.graphics.write(tostring(vars.debugPrint[1]), 26, 1, colors.white, colors.black)
         obsi.graphics.write(tostring(vars.debugPrint[2]), 26, 2, colors.white, colors.black)
         obsi.graphics.write(tostring(vars.debugPrint[3]), 26, 3, colors.white, colors.black)
-        obsi.graphics.write(tostring(vars.debugPrint[7]), 26, 7, colors.white, colors.black)
-        obsi.graphics.write(tostring(vars.debugPrint[4]), 10, 4, colors.white, colors.black)
-        obsi.graphics.write(tostring(vars.debugPrint[5]), 10, 5, colors.white, colors.black)
-        obsi.graphics.write(tostring(vars.debugPrint[6]), 10, 6, colors.white, colors.black)
-        obsi.graphics.write(tostring(#vars.selectedCards.. ", " .. vars.selectedCount), 10, 7, colors.white, colors.black)
 
     end
     if vars.gameState == "blindDeckview" then -- ingame deck view
