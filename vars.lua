@@ -17,14 +17,14 @@ vars.money = 4
 vars.blindGoal = 300
 vars.curChips = 0
 vars.curMult = 0
-vars.totalScore = 0
+vars.currentScore = 0
 
 -- cards
 vars.handSize = 8
 vars.handsLeft = 4
-vars.discardsLeft = 30
+vars.discardsLeft = 3
 vars.maxHands = 4
-vars.maxSelected = 30
+vars.maxSelected = 5
 vars.selectedCount = 0
 vars.maxDiscards = 3
 

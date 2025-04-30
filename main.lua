@@ -29,8 +29,10 @@ function obsi.onMousePress(x, y, button)
     vars.debugPrint[1] = x .. ", " .. y .. ", " .. button
     vars.debugPrint[3] = "clicked nothing"
 
+    -- in game click checks
     if vars.gameState == "blind" then
-        game.discardBtnClicked()
+        game.discardBtnClicked() -- DISCARD BUTTON
+        game.playBtnClicked() -- PLAY BUTTON
         if game.handCollDown() then
             game.selectHand(game.handCollDown())
             game.updateSelectedCards()
@@ -44,10 +46,6 @@ function obsi.onMousePress(x, y, button)
         if game.mouseCollCheck(48, 14, 3, 3) then -- DECKVIEW
             vars.debugPrint[3] = "clicked deck"
             vars.gameState = "blindDeckview"
-            return
-        end
-        if game.mouseCollCheck(16, 17, 7, 2) then -- PLAY BUTTON
-            vars.debugPrint[3] = "clicked play"
             return
         end
     end

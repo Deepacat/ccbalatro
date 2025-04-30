@@ -20,7 +20,7 @@ end
 function game.drawHand()
     if vars.initDraw then
         game.distributeHand()
-        -- vars.initDraw = false
+        vars.initDraw = false
     end
     for i = 1, #vars.currentHand do
         vars.currentHand[i]:draw()
@@ -65,6 +65,15 @@ function game.mouseCollCheck(sx, sy, sw, sh)
         my >= sy and my < sy + sh
 end
 
+function game.playBtnClicked()
+    if game.mouseCollCheck(16, 17, 7, 2) and #vars.selectedCards > 0 and vars.handsLeft > 0 then
+        -- sfx(sfx_play_btn_clicked)
+        vars.handsLeft = vars.handsLeft - 1
+        -- animation = cocreate(score_hand)
+        game.scoreHand()
+    end
+end
+
 function game.discardBtnClicked()
     if not game.mouseCollCheck(28, 17, 7, 2) then return end
     vars.debugPrint[4] = ""
@@ -76,13 +85,87 @@ function game.discardBtnClicked()
             vars.debugPrint[4] = (vars.debugPrint[4] .. card.suit[2] .. card.rank .. ", ")
             util.del(vars.currentHand, card)
         end
-        vars.selectedCards = {}
         game.dealHand(vars.currentDeck, vars.selectedCount)
-        vars.init_draw = false
+        vars.selectedCards = {}
+        vars.initDraw = false
         vars.selectedCount = 0
         vars.discardsLeft = vars.discardsLeft - 1
         -- error_message = ""
     end
+end
+
+function game.addMoney(i, card)
+	if(i == 0) then return end
+	vars.money = vars.money + i
+	-- sfx(sfx_add_money)
+	-- add_sparkle(35,card)
+	-- pause(7)
+end
+
+function game.multiplyMult(i, card)
+	if(i == 0) then return end
+	vars.curMult = vars.curMult* i
+	-- sfx(sfx_multiply_mult)
+	-- add_sparkle(34,card)
+	-- pause(7)
+end
+
+function game.addMult(i, card)
+	if(i == 0) then return end
+	vars.curChips = vars.curMult + i
+	-- sfx(sfx_add_mult)
+	-- add_sparkle(33,card)
+	-- pause(5)
+end
+
+function game.addChips(i, card)
+	if(i == 0) then return end
+	vars.curChips = vars.curMult + i
+	-- sfx(sfx_add_chips)
+	-- add_sparkle(32,card)
+	-- pause(5)
+end
+
+function game.finishScoringHand()
+    if vars.currentScore >= (vars.blindGoal) then
+        -- win_state()
+        -- in_shop = true
+    else
+        for card in util.all(vars.selectedCards) do
+            util.del(vars.currentHand, card)	
+        end
+        vars.selectedCards = {}
+        game.dealHand(vars.currentDeck, vars.selectedCount)
+        vars.initDraw = true
+        vars.selectedCount = 0
+        vars.scoredCards= {}
+        -- error_message = ""
+        if vars.handsLeft == 0 then
+            -- lose_state()
+        end
+    end
+end
+
+function game.scoreHand()
+    -- pause(5) -- wait for sfx
+    -- card are processed left-to-right
+    game.sortByX(vars.scoredCards)
+    -- Score cards
+    for card in util.all(vars.scoredCards) do
+        game.addChips(card.chips + card.effectChips, card)
+        game.addMult(card.mult, card)
+        -- for joker in all(joker_cards) do
+        --     joker:card_effect(card)
+        -- end
+    end
+    -- score_held_cards()
+    -- score_jokers()
+    vars.currentScore = vars.currentScore + (vars.curChips * vars.curMult)
+    game.finishScoringHand()
+    -- Reset
+    vars.curChips = 0
+    vars.curMult = 0
+    vars.handTypeText = ""
 end
 
 function game.containsFlush(cards)
@@ -250,11 +333,11 @@ function game.updateSelectedCards()
     end
     local handType = game.checkHandType()
     if handType ~= "none" then
-        -- vars.handTypeText = handType
-        -- vars.chips = 0
-        -- vars.mult = 0
-        -- vars.chips = vars.chips + vars.handTypes[handType].baseChips
-        -- vars.mult = vars.mult + vars.handTypes[handType].baseMult
+        vars.handTypeText = handType
+        vars.curChips = 0
+        vars.curMult = 0
+        vars.curChips = vars.curChips + vars.handTypes[handType].baseChips
+        vars.curMult = vars.curMult + vars.handTypes[handType].baseMult
     end
 end
 
@@ -388,16 +471,16 @@ function itemObj:detect_moved()
 end
 
 function itemObj:drop()
-    local mx = obsi.mouse.getX()
-    local my = obsi.mouse.getY()
-    if (game.pickedUpItem ~= self) then return end
-    if (not self.pickedUp) then return end
-    self:dropAt(
-        mx - self.pickedUp.offx,
-        my - self.pickedUp.offy
-    )
-    self.pickedUp = nil
-    game.pickedUpItem = nil
+    -- local mx = obsi.mouse.getX()
+    -- local my = obsi.mouse.getY()
+    -- if (game.pickedUpItem ~= self) then return end
+    -- if (not self.pickedUp) then return end
+    -- self:dropAt(
+    --     mx - self.pickedUp.offx,
+    --     my - self.pickedUp.offy
+    -- )
+    -- self.pickedUp = nil
+    -- game.pickedUpItem = nil
 end
 
 -- fallback: leave it where it lies
