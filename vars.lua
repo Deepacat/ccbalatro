@@ -24,7 +24,7 @@ vars.handSize = 8
 vars.handsLeft = 4
 vars.discardsLeft = 3
 vars.maxHands = 4
-vars.maxSelected = 50
+vars.maxSelected = 5
 vars.selectedCount = 0
 vars.maxDiscards = 3
 
@@ -73,8 +73,8 @@ vars.handTypes = {
     ["Three of a Kind"] = { baseChips = 30, baseMult = 3, level = 1 },
     ["Two Pair"] = { baseChips = 20, baseMult = 2, level = 1 },
     ["Pair"] = { baseChips = 10, baseMult = 2, level = 1 },
-    ["High Card"] = { baseChips = 5, baseMult = 1, level = 1 },
-    ["None"] = { baseChips = 0, baseMult = 0, level = 0 }
+    ["High Card"] = { baseChips = 5, baseMult = 1, level = 1 }
 }
+vars.handTypesCopy = {}
 
 return vars

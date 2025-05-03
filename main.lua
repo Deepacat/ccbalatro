@@ -2,9 +2,16 @@ local obsi = require("obsi2")
 local vars = require("vars")
 local game = require("game")
 local render = require("render")
+local util = require("util")
+local monitor = peripheral.find("monitor")
+
+if monitor then
+    monitor.setTextScale(0.5)
+end
 
 -- Obsi run functions --
 function obsi.load()
+    game.makeHandTypesCopy()
     game.resetDeck()
     game.createBaseDeck()
     vars.baseDeck = game.createBaseDeck()
@@ -55,13 +62,18 @@ function obsi.onMousePress(x, y, button)
         end
     end
     if button == 2 then
-        if vars. gameState == "blind" then
+        if vars.gameState == "blind" then
             game.deselectAllCards()
         end
     end
 end
 
+vars.animation = util.cocreate(print)
 function obsi.update()
+    if util.costatus(vars.animation) ~= 'dead' then
+        util.coresume(vars.animation)
+        return
+    end
 end
 
 function obsi.draw()

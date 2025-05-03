@@ -70,8 +70,7 @@ function game.playBtnClicked()
     if game.mouseCollCheck(16, 17, 7, 2) and #vars.selectedCards > 0 and vars.handsLeft > 0 then
         -- sfx(sfx_play_btn_clicked)
         vars.handsLeft = vars.handsLeft - 1
-        -- animation = cocreate(score_hand)
-        game.scoreHand()
+        vars.animation = util.cocreate(game.scoreHand)
     end
 end
 
@@ -88,6 +87,14 @@ function game.discardBtnClicked()
         vars.selectedCount = 0
         vars.discardsLeft = vars.discardsLeft - 1
         -- error_message = ""
+    end
+end
+
+-- animations
+function game.pause(frames)
+    while frames > 0 do
+        frames = frames - 1
+        util.yield()
     end
 end
 
@@ -123,10 +130,69 @@ function game.addChips(i, card)
     -- pause(5)
 end
 
+function game.makeHandTypesCopy()
+    for k, v in pairs(vars.handTypes) do
+        local new_table = {}
+        for sub_k, sub_v in pairs(v) do
+            new_table[sub_k] = sub_v
+        end
+        vars.handTypesCopy[k] = new_table
+    end
+end
+
+function game.winState()
+    -- for card in util.all(hand) do
+    -- 	card:when_held_at_end()
+    -- 	pause(1)
+    -- end
+    -- error_message = ""
+    -- update_round_and_score()	
+    -- cash_out_interest()
+    -- cash_out_money_earned_per_round()
+    -- cash_out_money_earned_per_hand_remaining()
+    -- add_cards_to_shop()
+    vars.ante = vars.ante + 1
+    vars.selectedCount = 0
+    vars.scoredCards = {}
+    vars.handsLeft = vars.maxHands
+    vars.discardsLeft = vars.maxDiscards
+    vars.currentDeck = game.shuffleDeck(vars.baseDeck)
+    -- reset_card_params()
+    vars.selectedCards = {}
+    vars.currentHand = {}
+    vars.initDraw = true
+    game.dealHand(vars.currentDeck, vars.handSize)
+end
+
+function game.loseState()
+    vars.baseDeck = game.createBaseDeck()
+    -- clear(tarot_cards)
+    -- clear(joker_cards)
+    vars.ante = 1
+    vars.blindGoal = 300
+    vars.selectedCount = 0
+    vars.scoredCards = {}
+    vars.handsLeft = vars.maxHands
+    vars.discardsLeft = vars.maxDiscards
+    vars.currentScore = 0
+    -- reroll_price = 5
+    vars.currentDeck = game.shuffleDeck(vars.baseDeck)
+    -- reset_card_params()
+    vars.selectedCards = {}
+    vars.scoredCards = {}
+    -- shop_options = {}
+    vars.currentHand = {}
+    vars.handTypes = vars.handTypesCopy
+    vars.initDraw = true
+    game.dealHand(vars.currentDeck, vars.handSize)
+    vars.money = 4
+end
+
 function game.finishScoringHand()
     if vars.currentScore >= (vars.blindGoal) then
         -- win_state()
         -- vars.gameState = "shop"
+        game.loseState()
     else
         for card in util.all(vars.selectedCards) do
             util.del(vars.currentHand, card)
@@ -138,13 +204,13 @@ function game.finishScoringHand()
         vars.scoredCards = {}
         -- error_message = ""
         if vars.handsLeft == 0 then
-            -- lose_state()
+            game.loseState()
         end
     end
 end
 
 function game.scoreHand()
-    -- pause(5) -- wait for sfx
+    game.pause(5) -- wait for sfx
     -- card are processed left-to-right
     game.sortByX(vars.scoredCards)
     -- Score cards
@@ -388,11 +454,11 @@ function itemObj:new(obj)
 end
 
 function itemObj:place(x, y, frames)
-    -- if util.max(0, frames) > 0 then
-    self.fromx = self.posx
-    self.fromy = self.posy
-    -- self.frames = frames
-    -- end
+    if util.max(0, frames) > 0 then
+        self.fromx = self.posx
+        self.fromy = self.posy
+        self.frames = frames
+    end
     self.posx = x
     self.posy = y
 end
@@ -405,19 +471,19 @@ end
 
 function itemObj:draw()
     if (game.pickedUpItem == self) then return end
-    -- -- animation
-    -- if self.frames > 0 then
-    --     self.frames = self.frames - 1
-    --     if self.frames == 0 then
-    --         self.fromx = nil
-    --         self.fromy = nil
-    --     else
-    --         self.fromx = self.fromx + (self.posx - self.fromx) / self.frames
-    --         self.fromy = self.fromy + (self.posy - self.fromy) / self.frames
-    --         self:drawAt(self.fromx, self.fromy)
-    --         return
-    --     end
-    -- end
+    -- animation
+    if self.frames > 0 then
+        self.frames = self.frames - 1
+        if self.frames == 0 then
+            self.fromx = nil
+            self.fromy = nil
+        else
+            self.fromx = self.fromx + (self.posx - self.fromx) / self.frames
+            self.fromy = self.fromy + (self.posy - self.fromy) / self.frames
+            self:drawAt(self.fromx, self.fromy)
+            return
+        end
+    end
 
     -- no animation
     self:drawAt(self.posx, self.posy)

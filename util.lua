@@ -1,5 +1,10 @@
 local util = {}
 
+util.cocreate = coroutine.create
+util.costatus = coroutine.status
+util.coresume = coroutine.resume
+util.yield = coroutine.yield
+
 function util.dump(o)
     if type(o) == 'table' then
         local s = '{ '
