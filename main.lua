@@ -98,6 +98,7 @@ function obsi.draw()
     if vars.gameState == "blindDeckview" then -- ingame deck view
         render.renderAllCards("viewScreen")
     end
+    game.drawSparkles()
 end
 
 obsi.init()

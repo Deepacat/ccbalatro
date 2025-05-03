@@ -103,7 +103,8 @@ function game.addMoney(i, card)
     vars.money = vars.money + i
     -- sfx(sfx_add_money)
     -- add_sparkle(35,card)
-    -- pause(7)
+    game.addSparkle(tostring("$"), colors.white, colors.green, card)
+    game.pause(20)
 end
 
 function game.multiplyMult(i, card)
@@ -111,7 +112,8 @@ function game.multiplyMult(i, card)
     vars.curMult = vars.curMult * i
     -- sfx(sfx_multiply_mult)
     -- add_sparkle(34,card)
-    -- pause(7)
+    game.addSparkle(tostring(card.mult), colors.white, colors.red, card)
+    game.pause(15)
 end
 
 function game.addMult(i, card)
@@ -119,15 +121,45 @@ function game.addMult(i, card)
     vars.curMult = vars.curMult + i
     -- sfx(sfx_add_mult)
     -- add_sparkle(33,card)
-    -- pause(5)
+    game.addSparkle(tostring(card.mult), colors.white, colors.red, card)
+    game.pause(10)
 end
 
 function game.addChips(i, card)
     if (i == 0) then return end
     vars.curChips = vars.curChips + i
     -- sfx(sfx_add_chips)
-    -- add_sparkle(32,card)
-    -- pause(5)
+    game.addSparkle(tostring(card.chips), colors.white, colors.blue, card)
+    game.pause(10)
+end
+
+-- sparkles
+function game.addSparkle(text, fgcol, bgcol, source)
+    if (source == nil or util.max(0, source.posy) < 1) then return end
+    util.add(vars.sparkles, {
+        x = source.posx,
+        y = source.posy,
+        text = text,
+        fgcol = fgcol,
+        bgcol = bgcol,
+        -- sprite_index = sprite_index,
+        frames = 15
+    })
+end
+
+function game.drawSparkles()
+    for i = #vars.sparkles, 1, -1 do
+        local sp = vars.sparkles[i]
+        -- spr(sp.sprite_index, sp.x, sp.y)
+        obsi.graphics.write("+", sp.x, sp.y - 3, sp.fgcol, sp.bgcol)
+        obsi.graphics.write(sp.text, sp.x, sp.y - 2, sp.fgcol, sp.bgcol)
+        if sp.frames > 0 then
+            sp.frames = sp.frames - 1
+            --     sp.y = sp.y - 1
+        else
+            util.deli(vars.sparkles, i)
+        end
+    end
 end
 
 function game.makeHandTypesCopy()
@@ -207,10 +239,11 @@ function game.finishScoringHand()
             game.loseState()
         end
     end
+    game.pause(20)
 end
 
 function game.scoreHand()
-    game.pause(5) -- wait for sfx
+    game.pause(5)
     -- card are processed left-to-right
     game.sortByX(vars.scoredCards)
     -- Score cards

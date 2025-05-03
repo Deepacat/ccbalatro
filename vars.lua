@@ -18,6 +18,7 @@ vars.blindGoal = 300
 vars.curChips = 0
 vars.curMult = 0
 vars.currentScore = 0
+vars.sparkles = {}
 
 -- cards
 vars.handSize = 8
