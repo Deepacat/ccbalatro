@@ -222,6 +222,7 @@ end
 
 function game.finishScoringHand()
     if vars.currentScore >= (vars.blindGoal) then
+        game.pause(30)
         -- win_state()
         -- vars.gameState = "shop"
         game.loseState()
@@ -236,10 +237,10 @@ function game.finishScoringHand()
         vars.scoredCards = {}
         -- error_message = ""
         if vars.handsLeft == 0 then
+            game.pause(30)
             game.loseState()
         end
     end
-    game.pause(20)
 end
 
 function game.scoreHand()
@@ -262,6 +263,7 @@ function game.scoreHand()
     vars.curChips = 0
     vars.curMult = 0
     vars.handTypeText = ""
+    game.pause(60)
 end
 
 function game.containsFlush(cards)
@@ -561,7 +563,7 @@ end
 -- detect if the mouse moves
 -- more than 1 pixel between
 -- mouse_down and mouse_up
-function itemObj:detect_moved()
+function itemObj:detectMoved()
     local mx = obsi.mouse.getX()
     local my = obsi.mouse.getY()
     if (not self.pickedUp) then return end
