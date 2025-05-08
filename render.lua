@@ -15,7 +15,7 @@ function render.renderScore()
     obsi.graphics.write(tostring(vars.curMult), 3 + #tostring(vars.curChips), 10, colors.white, colors.red)
     if (vars.handTypeText ~= "") then
         obsi.graphics.write(vars.handTypeText .. " Lv" .. vars.handTypes[vars.handTypeText].level,
-        2, 11, colors.white, colors.green)
+            2, 11, colors.white, colors.green)
     end
     obsi.graphics.write(vars.currentScore .. "/", 2, 12, colors.white, colors.green)
     obsi.graphics.write(tostring(vars.blindGoal), 2, 13, colors.white, colors.green)
@@ -51,10 +51,15 @@ function render.renderSortBtn()
 end
 
 function render.renderJokers()
-    obsi.graphics.setForegroundColor(colors.white)
-    obsi.graphics.rectangle("fill", 2, 2, 3, 3)
-    obsi.graphics.write(tostring(#vars.heldJokers) .. "/" .. tostring(vars.currentMaxJokers), 2, 6, colors.white,
-        colors.green)
+    local baseX = 2
+    local baseY = 2
+    for i = 1, #vars.heldJokers do
+        obsi.graphics.setForegroundColor(colors.white)
+        obsi.graphics.rectangle("fill", baseX + 3 * (i - 1), baseY, 3, 3)
+        obsi.graphics.write(tostring(vars.heldJokers[i].name), baseX + 3 * (i - 1), baseY, colors.white, colors.black)
+        baseX = baseX + 1
+        baseY = baseY + 1
+    end
 end
 
 function render.renderConsumables()

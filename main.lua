@@ -6,7 +6,9 @@ local util = require("util")
 local monitor = peripheral.find("monitor")
 
 if monitor then
-    monitor.setTextScale(0.5)
+    monitor.setTextScale(1)
+    local monx, mony = monitor.getSize()
+    monitor.setTextScale(monx / 51)
 end
 
 -- Obsi run functions --
@@ -17,6 +19,13 @@ function obsi.load()
     vars.baseDeck = game.createBaseDeck()
     vars.currentDeck = game.shuffleDeck(vars.baseDeck)
     game.dealHand(vars.currentDeck, vars.handSize)
+    -- util.add(vars.heldJokers, game.specialCards.Jokers[util.rnd(21)])
+    -- util.add(vars.heldJokers, game.specialCards.Jokers[util.rnd(21)])
+    -- util.add(vars.heldJokers, game.specialCards.Jokers[util.rnd(21)])
+    -- util.add(vars.heldJokers, game.specialCards.Jokers[util.rnd(21)])
+    for joker in util.all(game.specialCards.Jokers) do
+		util.add(vars.heldJokers, joker)
+	end
 end
 
 function obsi.onKeyPress(key)

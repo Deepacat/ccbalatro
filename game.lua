@@ -198,8 +198,8 @@ end
 
 function game.loseState()
     vars.baseDeck = game.createBaseDeck()
-    -- clear(tarot_cards)
-    -- clear(joker_cards)
+    util.clear(vars.heldConsumables)
+    util.clear(vars.heldJokers)
     vars.ante = 1
     vars.blindGoal = 300
     vars.selectedCount = 0
@@ -264,7 +264,7 @@ function game.scoreHand()
         -- end
     end
     -- score_held_cards()
-    -- score_jokers()
+    game.scoreJokers()
     vars.currentScore = vars.currentScore + (vars.curChips * vars.curMult)
     game.finishScoringHand()
     -- Reset
@@ -272,6 +272,12 @@ function game.scoreHand()
     vars.curMult = 0
     vars.handTypeText = ""
     game.pause(60)
+end
+
+function game.scoreJokers()
+	for joker in util.all(vars.heldJokers) do
+		joker:effect()
+	end
 end
 
 function game.containsFlush(cards)
@@ -730,6 +736,7 @@ function specialObj:describe()
     -- print("\^p"..self.type[1],120,99,self.fg)
 end
 
+---@diagnostic disable-next-line: duplicate-set-field
 function specialObj:drawAt(x, y)
     -- -- draw icon obviously
     -- spr(self.sprite_index, x, y)
@@ -808,7 +815,7 @@ function game.suitChange(new_suit)
 end
 
 -- shop inventory
-local specialCards = {
+game.specialCards = {
     Jokers = {
         jokerObj:new({
             name = "joker",

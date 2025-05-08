@@ -31,6 +31,14 @@ end
 -- shorthand for table.remove
 util.deli = table.remove
 
+-- clear a table while preserving
+-- object references to it
+function util.clear(table)
+	for i=#table,1,-1 do
+		util.deli(table,i)
+	end
+end
+
 -- shorthand for table.insert
 function util.add(t, v)
     return table.insert(t, v)

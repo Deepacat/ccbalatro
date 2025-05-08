@@ -4,6 +4,12 @@ local vars = {}
 
 vars.screenWidth, vars.screenHeight = term.getSize()
 
+local monitor = peripheral.find("monitor")
+
+if monitor then
+    vars.screenWidth, vars.screenHeight = monitor.getSize()
+end
+
 -- vars.seed = math.randomseed(42)
 
 
