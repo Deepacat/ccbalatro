@@ -51,14 +51,16 @@ function render.renderSortBtn()
 end
 
 function render.renderJokers()
-    local baseX = 2
-    local baseY = 2
-    for i = 1, #vars.heldJokers do
+    local x = 2
+    local y = 2
+    for joker in util.all(vars.heldJokers) do
+        joker:place(x, y)
+        joker:draw()
         obsi.graphics.setForegroundColor(colors.white)
-        obsi.graphics.rectangle("fill", baseX + 3 * (i - 1), baseY, 3, 3)
-        obsi.graphics.write(tostring(vars.heldJokers[i].name), baseX + 3 * (i - 1), baseY, colors.white, colors.black)
-        baseX = baseX + 1
-        baseY = baseY + 1
+        obsi.graphics.rectangle("fill", x, y, 3, 3)
+        obsi.graphics.write(tostring(joker.name), x, y, colors.white, colors.black)
+        x = x + 4
+        y = y + 1
     end
 end
 

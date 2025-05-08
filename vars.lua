@@ -29,7 +29,7 @@ vars.sparkles = {}
 -- cards
 vars.handSize = 8
 vars.handsLeft = 4
-vars.discardsLeft = 3
+vars.discardsLeft = 30
 vars.maxHands = 4
 vars.maxSelected = 5
 vars.selectedCount = 0

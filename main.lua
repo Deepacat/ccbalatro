@@ -19,13 +19,18 @@ function obsi.load()
     vars.baseDeck = game.createBaseDeck()
     vars.currentDeck = game.shuffleDeck(vars.baseDeck)
     game.dealHand(vars.currentDeck, vars.handSize)
-    -- util.add(vars.heldJokers, game.specialCards.Jokers[util.rnd(21)])
-    -- util.add(vars.heldJokers, game.specialCards.Jokers[util.rnd(21)])
-    -- util.add(vars.heldJokers, game.specialCards.Jokers[util.rnd(21)])
-    -- util.add(vars.heldJokers, game.specialCards.Jokers[util.rnd(21)])
+    -- for joker in util.all(game.specialCards.Jokers) do
+    --     if (joker.name == "odd todd" or joker.name == "smeared joker") then
+    --         util.add(vars.heldJokers, joker)
+    --     end
+    -- end
     for joker in util.all(game.specialCards.Jokers) do
-		util.add(vars.heldJokers, joker)
-	end
+        util.add(vars.heldJokers, joker)
+    end
+    -- util.add(vars.heldJokers, game.specialCards.Jokers[util.rnd(21)])
+    -- util.add(vars.heldJokers, game.specialCards.Jokers[util.rnd(21)])
+    -- util.add(vars.heldJokers, game.specialCards.Jokers[util.rnd(21)])
+    -- util.add(vars.heldJokers, game.specialCards.Jokers[util.rnd(21)])
 end
 
 function obsi.onKeyPress(key)
@@ -42,8 +47,6 @@ function obsi.onKeyPress(key)
 end
 
 function obsi.onMousePress(x, y, button)
-    vars.debugPrint[1] = x .. ", " .. y .. ", " .. button
-    vars.debugPrint[3] = "clicked nothing"
     if button == 1 then
         -- in game click checks
         if vars.gameState == "blind" then
@@ -52,15 +55,12 @@ function obsi.onMousePress(x, y, button)
             if game.handCollDown() then
                 game.selectHand(game.handCollDown())
                 game.updateSelectedCards()
-                vars.debugPrint[3] = "clicked card"
             end
             if game.mouseCollCheck(24, 17, 3, 2) then -- SORT BUTTON
-                vars.debugPrint[3] = "clicked sort"
                 game.changeSortMode()
                 return
             end
             if game.mouseCollCheck(48, 14, 3, 3) then -- DECKVIEW
-                vars.debugPrint[3] = "clicked deck"
                 vars.gameState = "blindDeckview"
                 return
             end
@@ -98,16 +98,12 @@ function obsi.draw()
         render.renderJokers()
         render.renderConsumables()
         render.renderDeck()
-        -- render.renderHand()
-
-        obsi.graphics.write(tostring(vars.debugPrint[1]), 26, 1, colors.white, colors.black)
-        obsi.graphics.write(tostring(vars.debugPrint[2]), 26, 2, colors.white, colors.black)
-        obsi.graphics.write(tostring(vars.debugPrint[3]), 26, 3, colors.white, colors.black)
     end
     if vars.gameState == "blindDeckview" then -- ingame deck view
         render.renderAllCards("viewScreen")
     end
     game.drawSparkles()
+    obsi.graphics.write(tostring(vars.debugPrint[1]), 26, 1, colors.white, colors.black)
 end
 
 obsi.init()

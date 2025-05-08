@@ -9,9 +9,9 @@ function game.distributeHand()
     local y = 14
     for card in util.all(vars.currentHand) do
         if card.selected then
-            card:place(x, y - 1, 5)
+            card:place(x, y - 1, 300)
         else
-            card:place(x, y, 5)
+            card:place(x, y, 300)
         end
         x = x + card.width + 1
     end
@@ -102,8 +102,7 @@ function game.addMoney(i, card)
     if (i == 0) then return end
     vars.money = vars.money + i
     -- sfx(sfx_add_money)
-    -- add_sparkle(35,card)
-    game.addSparkle(tostring("$"), colors.white, colors.green, card)
+    game.addSparkle(tostring("$" .. i), colors.white, colors.green, card)
     game.pause(20)
 end
 
@@ -111,8 +110,7 @@ function game.multiplyMult(i, card)
     if (i == 0) then return end
     vars.curMult = vars.curMult * i
     -- sfx(sfx_multiply_mult)
-    -- add_sparkle(34,card)
-    game.addSparkle(tostring(card.mult), colors.white, colors.red, card)
+    game.addSparkle(tostring(i), colors.white, colors.magenta, card)
     game.pause(15)
 end
 
@@ -120,8 +118,7 @@ function game.addMult(i, card)
     if (i == 0) then return end
     vars.curMult = vars.curMult + i
     -- sfx(sfx_add_mult)
-    -- add_sparkle(33,card)
-    game.addSparkle(tostring(card.mult), colors.white, colors.red, card)
+    game.addSparkle(tostring(i), colors.white, colors.red, card)
     game.pause(10)
 end
 
@@ -129,7 +126,7 @@ function game.addChips(i, card)
     if (i == 0) then return end
     vars.curChips = vars.curChips + i
     -- sfx(sfx_add_chips)
-    game.addSparkle(tostring(card.chips), colors.white, colors.blue, card)
+    game.addSparkle(tostring(i), colors.white, colors.blue, card)
     game.pause(10)
 end
 
@@ -151,11 +148,11 @@ function game.drawSparkles()
     for i = #vars.sparkles, 1, -1 do
         local sp = vars.sparkles[i]
         -- spr(sp.sprite_index, sp.x, sp.y)
-        obsi.graphics.write("+", sp.x, sp.y - 3, sp.fgcol, sp.bgcol)
-        obsi.graphics.write(sp.text, sp.x, sp.y - 2, sp.fgcol, sp.bgcol)
+        -- obsi.graphics.write("+", sp.x-1, sp.y - 2, sp.fgcol, sp.bgcol)
+        obsi.graphics.write("+" .. sp.text, sp.x - 1, sp.y - 1, sp.fgcol, sp.bgcol)
         if sp.frames > 0 then
             sp.frames = sp.frames - 1
-            --     sp.y = sp.y - 1
+            sp.y = sp.y - 0.3
         else
             util.deli(vars.sparkles, i)
         end
@@ -259,9 +256,9 @@ function game.scoreHand()
     for card in util.all(vars.scoredCards) do
         game.addChips(card.chips + card.effectChips, card)
         game.addMult(card.mult, card)
-        -- for joker in all(joker_cards) do
-        --     joker:card_effect(card)
-        -- end
+        for joker in util.all(vars.heldJokers) do
+            joker:cardEffect(card)
+        end
     end
     -- score_held_cards()
     game.scoreJokers()
@@ -275,20 +272,21 @@ function game.scoreHand()
 end
 
 function game.scoreJokers()
-	for joker in util.all(vars.heldJokers) do
-		joker:effect()
-	end
+    for joker in util.all(vars.heldJokers) do
+        joker:effect()
+        game.pause(10)
+    end
 end
 
 function game.containsFlush(cards)
-    local run_goal = 5
-    -- if(has_joker("four fingers")) then run_goal=4 end
-    if (#cards < run_goal) then return false end
+    local runGoal = 5
+    if (game.hasJoker("four fingers")) then runGoal = 4 end
+    if (#cards < runGoal) then return false end
     local first = cards[1]
     local ct = 0
     for card in util.all(cards) do
-        if (card:matches_suit(first)) then ct = ct + 1 end
-        if (ct >= run_goal) then return true end
+        if (card:matchesSuit(first)) then ct = ct + 1 end
+        if (ct >= runGoal) then return true end
     end
     return false
 end
@@ -308,7 +306,7 @@ end
 function game.containsStraight(cf)
     -- todo: implement shortcut joker
     local runGoal = 5
-    -- if(has_joker("four fingers"))run_goal=4
+    if (game.hasJoker("four fingers")) then runGoal = 4 end
     if #vars.selectedCards < runGoal then
         return false
     end
@@ -464,11 +462,11 @@ function game.selectHand(card)
     if card.selected == false and vars.selectedCount < vars.maxSelected then
         card.selected = true
         vars.selectedCount = vars.selectedCount + 1
-        card:place(card.posx, card.posy - 1, 5)
+        card:place(card.posx, card.posy - 1, 0)
     elseif card.selected == true then
         card.selected = false
         vars.selectedCount = vars.selectedCount - 1
-        card:place(card.posx, card.posy + 1, 5)
+        card:place(card.posx, card.posy + 1, 0)
         --     if vars.selectedCount == 4 then error_message = "" end
         -- else
         --     sfx(sfx_error_message)
@@ -619,8 +617,8 @@ local cardObj = itemObj:new({
     width = 2,
     effectChips = 0,
     mult = 0,
-    posx = 0,
-    posy = 0,
+    posx = 49,
+    posy = 14,
     whenHeldInHand = doNothing,
     whenHeldAtEnd = doNothing,
     effect = doNothing,
@@ -697,24 +695,25 @@ function cardObj:isFace()
     return util.contains({ 'K', 'J', 'Q' }, self.rank)
 end
 
-function cardObj:matches_suit(other)
+function cardObj:matchesSuit(other)
     -- 44=wild card
     if (other.bgtile == 44) then return true end
     -- compare normally
-    return self:is_suit(other.suit)
+    return self:isSuit(other.suit[1])
 end
 
-function cardObj:is_suit(target)
+function cardObj:isSuit(target)
     -- 44=wild card
     if (self.bgtile == 44) then return true end
     if game.hasJoker('smeared joker') then
-        if target == 's' or target == 'C' then
-            return self.suit == 'S' or self.suit == 'C'
-        else
-            return self.suit == 'D' or self.suit == 'H'
+        if target == 'S' or target == 'C' then
+            return self.suit[1] == 'S' or self.suit[1] == 'C'
+        end
+        if target == 'D' or target == 'H' then
+            return self.suit[1] == 'D' or self.suit[1] == 'H'
         end
     end
-    return self.suit == target
+    return self.suit[1] == target
 end
 
 -- special cards
@@ -759,7 +758,7 @@ local jokerObj = specialObj:new({
     fg = 7,
     ref = vars.heldJokers,
     effect = function(self) end,
-    card_effect = function(self, card) end
+    cardEffect = function(self, card) end
 })
 local tarotObj = specialObj:new({
     type = "Tarot",
@@ -869,18 +868,18 @@ game.specialCards = {
         jokerObj:new({
             name = "photograph",
             price = 5,
-            card_affected = nil,
-            card_effect = function(self, card)
-                if self.card_affected == nil and card:is_face() then
-                    self.card_affected = card
+            cardAffected = nil,
+            cardEffect = function(self, card)
+                if self.cardAffected == nil and card:isFace() then
+                    self.cardAffected = card
                 end
-                if self.card_affected == card then
+                if self.cardAffected == card then
                     game.multiplyMult(2, card)
                     game.addSparkle("*2", colors.white, colors.red, self)
                 end
             end,
             effect = function(self)
-                self.card_affected = nil
+                self.cardAffected = nil
             end,
             sprite_index = 133,
             description = "first played face card gives\nx2 mult when scored",
@@ -897,7 +896,7 @@ game.specialCards = {
         jokerObj:new({
             name = "odd todd",
             price = 4,
-            card_effect = function(self, card)
+            cardEffect = function(self, card)
                 if (util.contains({ 'A', '3', '5', '7', '9' }, card.rank)) then
                     game.addChips(31, card)
                 end
@@ -908,8 +907,8 @@ game.specialCards = {
         jokerObj:new({
             name = "scary face",
             price = 4,
-            card_effect = function(self, card)
-                if card:is_face() then
+            cardEffect = function(self, card)
+                if card:isFace() then
                     game.addChips(30, card)
                 end
             end,
@@ -919,8 +918,8 @@ game.specialCards = {
         jokerObj:new({
             name = "scholar",
             price = 4,
-            card_effect = function(self, card)
-                if card.rank == 'a' then
+            cardEffect = function(self, card)
+                if card.rank == 'A' then
                     game.addChips(20, card)
                     game.addChips(4, card)
                 end
@@ -931,7 +930,7 @@ game.specialCards = {
         jokerObj:new({
             name = "even steven",
             price = 4,
-            card_effect = function(self, card)
+            cardEffect = function(self, card)
                 if util.contains({ '2', '4', '6', '8', '10' }, card.rank) then
                     game.addMult(4, card)
                 end
@@ -942,8 +941,8 @@ game.specialCards = {
         jokerObj:new({
             name = "gluttonous joker",
             price = 5,
-            card_effect = function(self, card)
-                if card:is_suit('C') then
+            cardEffect = function(self, card)
+                if card:isSuit('C') then
                     game.addMult(3, card)
                 end
             end,
@@ -953,8 +952,8 @@ game.specialCards = {
         jokerObj:new({
             name = "lusty joker",
             price = 5,
-            card_effect = function(self, card)
-                if card:is_suit('H') then
+            cardEffect = function(self, card)
+                if card:isSuit('H') then
                     game.addMult(3, card)
                 end
             end,
@@ -964,8 +963,8 @@ game.specialCards = {
         jokerObj:new({
             name = "wrathful joker",
             price = 5,
-            card_effect = function(self, card)
-                if card:is_suit('S') then
+            cardEffect = function(self, card)
+                if card:isSuit('S') then
                     game.addMult(3, card)
                 end
             end,
@@ -975,8 +974,8 @@ game.specialCards = {
         jokerObj:new({
             name = "greedy joker",
             price = 5,
-            card_effect = function(self, card)
-                if card:is_suit('D') then
+            cardEffect = function(self, card)
+                if card:isSuit('D') then
                     game.addMult(3, card)
                 end
             end,
@@ -1020,14 +1019,14 @@ game.specialCards = {
         jokerObj:new({
             name = "pareidolia",
             price = 5,
-            -- effect in card_obj:is_face
+            -- effect in card_obj:isFace
             sprite_index = 182,
             description = "all cards count as face cards"
         }),
         jokerObj:new({
             name = "smeared joker",
             price = 7,
-            -- effect in card_obj:is_suit
+            -- effect in card_obj:isSuit
             sprite_index = 181,
             description = "clubs and spades are the same suit.\nhearts and diamonds are the same suit."
         }),
