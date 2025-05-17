@@ -90,7 +90,7 @@ function obsi.onMousePress(x, y, button)
 end
 
 function obsi.onMouseRelease(x, y)
-    vars.tooltip = ""
+    vars.tooltip[3] = ""
 end
 
 vars.animation = util.cocreate(print)
@@ -102,15 +102,16 @@ function obsi.update()
 end
 
 function obsi.draw()
+    obsi.graphics.flushAll()
     render.renderbg()
     if vars.gameState == "blind" then -- ingame UI rendering
         game.drawHand()
+        render.renderScore()
         render.renderPlayBtn()
         render.renderSortBtn()
         render.renderDiscardBtn()
         render.renderMoney()
         render.renderAnte()
-        render.renderScore()
         render.renderJokers()
         render.renderConsumables()
         render.renderDeck()

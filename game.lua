@@ -751,9 +751,13 @@ local specialObj = itemObj:new({})
 -- is over the object
 function specialObj:describe()
     if type(self.description) == "string" then
-        vars.tooltip = self.description
+        vars.tooltip[1] = self.name
+        vars.tooltip[2] = self.type
+        vars.tooltip[3] = self.description
     else
-        vars.tooltip = self:description()
+        vars.tooltip[1] = self.name
+        vars.tooltip[2] = self.type
+        vars.tooltip[3] = self:description()
     end
 end
 

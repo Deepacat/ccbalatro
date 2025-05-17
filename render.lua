@@ -60,7 +60,6 @@ function render.renderJokers()
         obsi.graphics.rectangle("fill", x, y, 3, 3)
         obsi.graphics.write(tostring(joker.name), x, y, colors.white, colors.black)
         x = x + 4
-        y = y + 1
     end
     obsi.graphics.write(tostring(#vars.heldJokers) .. "/" .. tostring(vars.currentMaxJokers), 2, 6, colors.white,
         colors.green)
@@ -92,16 +91,17 @@ function render.renderHand()
 end
 
 function render.renderTooltip()
-    if vars.tooltip ~= "" then
-        local tipArr = util.splitText(vars.tooltip)
+    if vars.tooltip[3] ~= "" or nil then
+        local tipArr = util.splitText(tostring(vars.tooltip[3]))
         local x = 8
-        local y = 8
+        local y = 9
         obsi.graphics.setForegroundColor(colors.blue)
         obsi.graphics.rectangle("line", 7, 7, 38, 6)
         obsi.graphics.setForegroundColor(colors.black)
-        obsi.graphics.rectangle("fill", x, y, 36, 4)
+        obsi.graphics.rectangle("fill", 8, 8, 36, 4)
+        obsi.graphics.write(tostring(vars.tooltip[1]) .. ", " .. tostring(vars.tooltip[2]), 8, 8, colors.white, colors.black)
         for word in util.all(tipArr) do
-            if(#word + x >= 44) then
+            if (#word + x >= 45) then
                 y = y + 1
                 x = 8
             end
