@@ -34,7 +34,7 @@ function game.handCollDown()
     for card in util.all(vars.currentHand) do
         if card:moused() then
             -- card:pickup()
-            card.drop_at = game.handCollUp
+            card.dropAt = game.handCollUp
             return card
         end
     end
@@ -112,7 +112,7 @@ function game.addMoney(i, card)
     if (i == 0) then return end
     vars.money = vars.money + i
     -- sfx(sfx_add_money)
-    game.addSparkle(tostring("$" .. i), colors.white, colors.green, card)
+    game.addSparkle("$" .. i, colors.white, colors.green, card)
     game.pause(20)
 end
 
@@ -120,7 +120,7 @@ function game.multiplyMult(i, card)
     if (i == 0) then return end
     vars.curMult = vars.curMult * i
     -- sfx(sfx_multiply_mult)
-    game.addSparkle(tostring(i), colors.white, colors.magenta, card)
+    game.addSparkle("*"..i, colors.white, colors.magenta, card)
     game.pause(15)
 end
 
@@ -128,7 +128,7 @@ function game.addMult(i, card)
     if (i == 0) then return end
     vars.curMult = vars.curMult + i
     -- sfx(sfx_add_mult)
-    game.addSparkle(tostring(i), colors.white, colors.red, card)
+    game.addSparkle("x"..i, colors.white, colors.red, card)
     game.pause(10)
 end
 
@@ -136,7 +136,7 @@ function game.addChips(i, card)
     if (i == 0) then return end
     vars.curChips = vars.curChips + i
     -- sfx(sfx_add_chips)
-    game.addSparkle(tostring(i), colors.white, colors.blue, card)
+    game.addSparkle("+"..i, colors.white, colors.blue, card)
     game.pause(10)
 end
 
@@ -157,7 +157,7 @@ function game.addSparkle(text, fgcol, bgcol, source)
         text = text,
         fgcol = fgcol,
         bgcol = bgcol,
-        -- sprite_index = sprite_index,
+        -- spriteIndex = spriteIndex,
         frames = 15
     })
 end
@@ -172,7 +172,7 @@ function game.drawSparkles()
                 return val + offset
             end
         end
-        obsi.graphics.write("+" .. sp.text, dir(sp.x, 1), dir(sp.y, 1), sp.fgcol, sp.bgcol)
+        obsi.graphics.write(sp.text, dir(sp.x, 1), dir(sp.y, 1), sp.fgcol, sp.bgcol)
         if sp.frames > 0 then
             sp.frames = sp.frames - 1
             sp.y = dir(sp.y, 0.3)
@@ -184,19 +184,19 @@ end
 
 function game.makeHandTypesCopy()
     for k, v in pairs(vars.handTypes) do
-        local new_table = {}
-        for sub_k, sub_v in pairs(v) do
-            new_table[sub_k] = sub_v
+        local newTable = {}
+        for subK, subV in pairs(v) do
+            newTable[subK] = subV
         end
-        vars.handTypesCopy[k] = new_table
+        vars.handTypesCopy[k] = newTable
     end
 end
 
 function game.winState()
-    -- for card in util.all(hand) do
-    -- 	card:when_held_at_end()
-    -- 	pause(1)
-    -- end
+    for card in util.all(vars.currentHand) do
+    	card:whenHeldAtEnd()
+    	game.pause(1)
+    end
     -- error_message = ""
     -- update_round_and_score()	
     -- cash_out_interest()
@@ -242,8 +242,8 @@ end
 
 function game.levelUpHandType(handTypeName, multAmount, chipAmount)
     local ht = vars.handTypes[handTypeName]
-    ht.base_mult = ht.base_mult + multAmount
-    ht.base_chips = ht.base_chips + chipAmount
+    ht.baseMult = ht.baseMult + multAmount
+    ht.baseChips = ht.baseChips + chipAmount
     ht.level = ht.level + 1
 end
 
@@ -598,7 +598,7 @@ end
 -- draw at absolute position
 -- regardless of obj position
 function itemObj:drawAt(x, y)
-    -- spr(self.sprite_index, x, y)
+    -- spr(self.spriteIndex, x, y)
 end
 
 function itemObj:moused(morex, morey)
@@ -698,7 +698,7 @@ function cardObj:drawAt(x, y)
     -- 	pal(8,suit_colors[self.suit])
     -- 	spr(self.bgtile,x,y,1,2)
     -- 	-- overlay rank
-    -- 	spr(self.sprite_index, x, y)
+    -- 	spr(self.spriteIndex, x, y)
     -- 	-- if not wild, overlay suit
     --  if self.bgtile != 44 then
     -- 		spr(suit_sprites[self.suit],x,y+8)
@@ -728,7 +728,7 @@ end
 
 function cardObj:setRank(r)
     self.rank = r.rank
-    -- self.sprite_index = r.sprite_index
+    -- self.spriteIndex = r.spriteIndex
     self.order = r.order
     self.chips = r.baseChips
 end
@@ -795,16 +795,16 @@ end
 ---@diagnostic disable-next-line: duplicate-set-field
 function specialObj:drawAt(x, y)
     -- -- draw icon obviously
-    -- spr(self.sprite_index, x, y)
+    -- spr(self.spriteIndex, x, y)
     -- -- draw sell icon if owned
     -- if in_shop and contains(shop_options,self) then
-    -- 	spr(btn_buy_sprite_index, x , y+self.height)
+    -- 	spr(btn_buy_spriteIndex, x , y+self.height)
     -- 	print("$"..self.price, x + self.width, y + self.height + 1, 7)
     -- elseif contains(self.ref,self) then
-    -- 	spr(btn_sell_sprite_index, x - self.width, y)
+    -- 	spr(btn_sell_spriteIndex, x - self.width, y)
     -- 	print("$"..calculate_sell_price(self.price), x - card_width, y + card_height + 1, 7)
     -- 	if self.usable then
-    -- 		spr(btn_use_sprite_index, x, y + self.height)
+    -- 		spr(btn_use_spriteIndex, x, y + self.height)
     -- 	end
     -- end
 end
@@ -879,7 +879,7 @@ game.specialCards = {
             effect = function(self)
                 game.addMult(4, self)
             end,
-            sprite_index = 128,
+            spriteIndex = 128,
             description = "+4 mult"
         }),
         jokerObj:new({
@@ -888,7 +888,7 @@ game.specialCards = {
             effect = function(self)
                 game.addMult(8, self)
             end,
-            sprite_index = 129,
+            spriteIndex = 129,
             description = "+8 mult"
         }),
         jokerObj:new({
@@ -901,7 +901,7 @@ game.specialCards = {
                 end
                 game.addMult(2 * minRank, self)
             end,
-            sprite_index = 130,
+            spriteIndex = 130,
             description = "adds double the rank of lowest\nranked card held in hand\nto mult"
         }),
         jokerObj:new({
@@ -910,7 +910,7 @@ game.specialCards = {
             effect = function(self)
                 game.addMult(util.flr(util.rnd(25)), self)
             end,
-            -- sprite_index = 131,
+            -- spriteIndex = 131,
             description = "adds a random amount of mult.\nlowest being 0, highest being 25",
         }),
         jokerObj:new({
@@ -919,7 +919,7 @@ game.specialCards = {
             effect = function(self)
                 game.multiplyMult(1.5, self)
             end,
-            sprite_index = 132,
+            spriteIndex = 132,
             description = "Multiplies your mult by 1.5",
         }),
         jokerObj:new({
@@ -932,13 +932,13 @@ game.specialCards = {
                 end
                 if self.cardAffected == card then
                     game.multiplyMult(2, card)
-                    game.addSparkle("*2", colors.white, colors.red, self)
+                    game.addSparkle("*2", colors.white, colors.pink, self)
                 end
             end,
             effect = function(self)
                 self.cardAffected = nil
             end,
-            sprite_index = 133,
+            spriteIndex = 133,
             description = "first played face card gives\nx2 mult when scored",
         }),
         jokerObj:new({
@@ -947,7 +947,7 @@ game.specialCards = {
             effect = function(self)
                 game.multiplyMult(3, self)
             end,
-            sprite_index = 134,
+            spriteIndex = 134,
             description = "Multiplies your mult by 3",
         }),
         jokerObj:new({
@@ -958,7 +958,7 @@ game.specialCards = {
                     game.addChips(31, card)
                 end
             end,
-            sprite_index = 140,
+            spriteIndex = 140,
             description = "adds 31 chips for each card with odd rank",
         }),
         jokerObj:new({
@@ -969,7 +969,7 @@ game.specialCards = {
                     game.addChips(30, card)
                 end
             end,
-            sprite_index = 142,
+            spriteIndex = 142,
             description = "played face cards give +30 \nchips when scored"
         }),
         jokerObj:new({
@@ -981,7 +981,7 @@ game.specialCards = {
                     game.addChips(4, card)
                 end
             end,
-            sprite_index = 141,
+            spriteIndex = 141,
             description = "played aces give +20 chips\nand +4 mult when scored"
         }),
         jokerObj:new({
@@ -992,7 +992,7 @@ game.specialCards = {
                     game.addMult(4, card)
                 end
             end,
-            sprite_index = 128,
+            spriteIndex = 128,
             description = "+4 mult for cards with even-numbered rank"
         }),
         jokerObj:new({
@@ -1003,7 +1003,7 @@ game.specialCards = {
                     game.addMult(3, card)
                 end
             end,
-            sprite_index = 179,
+            spriteIndex = 179,
             description = "played cards with club suit\ngive +3 mult when scored"
         }),
         jokerObj:new({
@@ -1014,7 +1014,7 @@ game.specialCards = {
                     game.addMult(3, card)
                 end
             end,
-            sprite_index = 177,
+            spriteIndex = 177,
             description = "played cards with heart suit\ngive +3 mult when scored"
         }),
         jokerObj:new({
@@ -1025,7 +1025,7 @@ game.specialCards = {
                     game.addMult(3, card)
                 end
             end,
-            sprite_index = 180,
+            spriteIndex = 180,
             description = "played cards with spade suit\ngive +3 mult when scored"
         }),
         jokerObj:new({
@@ -1036,7 +1036,7 @@ game.specialCards = {
                     game.addMult(3, card)
                 end
             end,
-            sprite_index = 178,
+            spriteIndex = 178,
             description = "played cards with diamond suit\ngive +3 mult when scored"
         }),
         jokerObj:new({
@@ -1045,7 +1045,7 @@ game.specialCards = {
             effect = function(self)
                 game.addChips(60, self)
             end,
-            sprite_index = 136,
+            spriteIndex = 136,
             description = "Adds 60 to your chips",
         }),
         jokerObj:new({
@@ -1054,7 +1054,7 @@ game.specialCards = {
             effect = function(self)
                 game.addChips(90, self)
             end,
-            sprite_index = 137,
+            spriteIndex = 137,
             description = "Adds 90 to your chips",
         }),
         jokerObj:new({
@@ -1070,28 +1070,28 @@ game.specialCards = {
                 end
                 game.addChips(util.rnd(chip_options), self)
             end,
-            sprite_index = 138,
+            spriteIndex = 138,
             description = "adds a random amount of chips.\nlowest being 0, highest being 150",
         }),
         jokerObj:new({
             name = "pareidolia",
             price = 5,
             -- effect in card_obj:isFace
-            sprite_index = 182,
+            spriteIndex = 182,
             description = "all cards count as face cards"
         }),
         jokerObj:new({
             name = "smeared joker",
             price = 7,
             -- effect in card_obj:isSuit
-            sprite_index = 181,
+            spriteIndex = 181,
             description = "clubs and spades are the same suit.\nhearts and diamonds are the same suit."
         }),
         jokerObj:new({
             name = "four fingers",
             price = 7,
             -- effect in contains_flush
-            sprite_index = 183,
+            spriteIndex = 183,
             description = "all flushes and straights can\nbe made with 4 cards."
         }),
     },
@@ -1102,7 +1102,7 @@ game.specialCards = {
             hand = "royal flush",
             chips = 50,
             mult = 5,
-            sprite_index = 153,
+            spriteIndex = 153,
         }),
         planetObj:new({
             name = "neptune",
@@ -1110,7 +1110,7 @@ game.specialCards = {
             hand = "straight flush",
             chips = 40,
             mult = 4,
-            sprite_index = 152,
+            spriteIndex = 152,
         }),
         planetObj:new({
             name = "mars",
@@ -1118,7 +1118,7 @@ game.specialCards = {
             hand = "four of a kind",
             chips = 30,
             mult = 3,
-            sprite_index = 151,
+            spriteIndex = 151,
         }),
         planetObj:new({
             name = "earth",
@@ -1126,7 +1126,7 @@ game.specialCards = {
             hand = "full house",
             chips = 25,
             mult = 2,
-            sprite_index = 150,
+            spriteIndex = 150,
         }),
         planetObj:new({
             name = "jupiter",
@@ -1134,7 +1134,7 @@ game.specialCards = {
             hand = "flush",
             chips = 15,
             mult = 2,
-            sprite_index = 149,
+            spriteIndex = 149,
         }),
         planetObj:new({
             name = "saturn",
@@ -1142,7 +1142,7 @@ game.specialCards = {
             hand = "straight",
             chips = 30,
             mult = 3,
-            sprite_index = 148,
+            spriteIndex = 148,
         }),
         planetObj:new({
             name = "venus",
@@ -1150,7 +1150,7 @@ game.specialCards = {
             hand = "three of a kind",
             chips = 20,
             mult = 2,
-            sprite_index = 147,
+            spriteIndex = 147,
         }),
         planetObj:new({
             name = "uranus",
@@ -1158,7 +1158,7 @@ game.specialCards = {
             hand = "two pair",
             chips = 20,
             mult = 1,
-            sprite_index = 146,
+            spriteIndex = 146,
         }),
         planetObj:new({
             name = "mercury",
@@ -1166,7 +1166,7 @@ game.specialCards = {
             hand = "pair",
             chips = 15,
             mult = 1,
-            sprite_index = 145,
+            spriteIndex = 145,
         }),
         planetObj:new({
             name = "pluto",
@@ -1174,7 +1174,7 @@ game.specialCards = {
             hand = "high card",
             chips = 10,
             mult = 1,
-            sprite_index = 144,
+            spriteIndex = 144,
         })
     },
     Tarots = {
@@ -1183,12 +1183,12 @@ game.specialCards = {
             price = 2,
             effect = game.cardEnhancement(1, function(card, self)
                 card.bgtile = 45
-                card.when_held_at_end = doNothing
-                card.when_held_at_end = function(c)
+                card.whenHeldAtEnd = doNothing
+                card.whenHeldAtEnd = function(c)
                     game.addMoney(3, c)
                 end
             end),
-            sprite_index = 169,
+            spriteIndex = 169,
             description = "converts 1 card into a\ngold card, which grants $3 if\ncard is in hand at end of round",
         }),
         tarotObj:new({
@@ -1196,12 +1196,12 @@ game.specialCards = {
             price = 2,
             effect = game.cardEnhancement(1, function(card, self)
                 card.bgtile = 46
-                card.when_held_in_hand = function(c)
+                card.whenHeldInHand = function(c)
                     game.multiplyMult(1.5, c)
                 end
-                card.when_held_at_end = doNothing
+                card.whenHeldAtEnd = doNothing
             end),
-            sprite_index = 170,
+            spriteIndex = 170,
             description = "converts 1 card into a\nsteel card, which grants x1.5 mult \nif card is left in hand",
         }),
         tarotObj:new({
@@ -1209,48 +1209,48 @@ game.specialCards = {
             price = 2,
             effect = game.cardEnhancement(1, function(card, self)
                 card.bgtile = 44
-                card.when_held_in_hand = doNothing
-                card.when_held_at_end = doNothing
+                card.whenHeldInHand = doNothing
+                card.whenHeldAtEnd = doNothing
             end),
-            sprite_index = 169,
+            spriteIndex = 169,
             description = "converts 1 card into a\nwild card, which matches\nevery suit",
         }),
         tarotObj:new({
             name = "strength",
             price = 2,
             effect = game.cardEnhancement(2, function(card, self)
-                card:add_rank(1)
+                card:addRank(1)
                 game.sortRank(vars.currentHand)
             end),
-            sprite_index = 160,
+            spriteIndex = 160,
             description = "increases the rank of two\nselected cards by 1",
         }),
         tarotObj:new({
             name = "the sun",
             price = 2,
             effect = game.suitChange("H"),
-            sprite_index = 161,
+            spriteIndex = 161,
             description = "changes the suit of 3 selected \ncards to hearts",
         }),
         tarotObj:new({
             name = "the star",
             price = 2,
             effect = game.suitChange("D"),
-            sprite_index = 162,
+            spriteIndex = 162,
             description = "changes the suit of 3 selected \ncards to diamonds",
         }),
         tarotObj:new({
             name = "the moon",
             price = 2,
             effect = game.suitChange("C"),
-            sprite_index = 163,
+            spriteIndex = 163,
             description = "changes the suit of 3 selected \ncards to clubs",
         }),
         tarotObj:new({
             name = "the world",
             price = 2,
             effect = game.suitChange("S"),
-            sprite_index = 164,
+            spriteIndex = 164,
             description = "changes the suit of 3 selected \ncards to spades",
         }),
         tarotObj:new({
@@ -1260,9 +1260,9 @@ game.specialCards = {
                 card.bgtile = 14
                 card.effect_chips = 0
                 card.mult = 4
-                card.when_held_in_hand = doNothing
+                card.whenHeldInHand = doNothing
             end),
-            sprite_index = 165,
+            spriteIndex = 165,
             description = "causes up to two cards to add\n4 mult when scored",
         }),
         tarotObj:new({
@@ -1272,10 +1272,10 @@ game.specialCards = {
                 card.bgtile = 13
                 card.effect_chips = 30
                 card.mult = 0
-                card.when_held_in_hand = doNothing
-                card.when_held_at_end = doNothing
+                card.whenHeldInHand = doNothing
+                card.whenHeldAtEnd = doNothing
             end),
-            sprite_index = 166,
+            spriteIndex = 166,
             description = "causes up to two cards to add\n30 chips when scored",
         }),
         tarotObj:new({
@@ -1288,7 +1288,7 @@ game.specialCards = {
                     game.addMoney(vars.money, tarot)
                 end
             end,
-            sprite_index = 167,
+            spriteIndex = 167,
             description = "Multiplies your money by\n2 with the max being 20",
         }),
         tarotObj:new({
@@ -1312,7 +1312,7 @@ game.specialCards = {
                     -- error_message = "Can only use this\n tarot card with 2 cards"
                 end
             end,
-            sprite_index = 168,
+            spriteIndex = 168,
             description = "Deletes two selected\ncards from the deck",
         })
     }
@@ -1334,7 +1334,7 @@ function game.createBaseDeck()
             local cardInfo = cardObj:new({
                 rank = vars.ranks[x].rank,
                 suit = vars.suits[y],
-                -- sprite_index = ranks[x].sprite_index,
+                -- spriteIndex = ranks[x].spriteIndex,
                 chips = vars.ranks[x].baseChips,
                 order = vars.ranks[x].order,
             })
