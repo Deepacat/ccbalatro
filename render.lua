@@ -62,6 +62,8 @@ function render.renderJokers()
         x = x + 4
         y = y + 1
     end
+    obsi.graphics.write(tostring(#vars.heldJokers) .. "/" .. tostring(vars.currentMaxJokers), 2, 6, colors.white,
+        colors.green)
 end
 
 function render.renderConsumables()

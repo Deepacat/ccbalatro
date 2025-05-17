@@ -14,6 +14,7 @@ end
 
 
 vars.debugPrint = {}
+vars.tooltip = ""
 
 -- game
 vars.gameState = "blind"

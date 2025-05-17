@@ -9,9 +9,9 @@ function game.distributeHand()
     local y = 14
     for card in util.all(vars.currentHand) do
         if card.selected then
-            card:place(x, y - 1, 300)
+            card:place(x, y - 1, 30)
         else
-            card:place(x, y, 300)
+            card:place(x, y, 30)
         end
         x = x + card.width + 1
     end
@@ -52,8 +52,8 @@ function game.handCollUp(self, px, py)
         --     game.sortByX(vars.currentHand)
         --     game.distributeHand()
         -- else -- click, not drop
-        --     game.selectHand(self)
-        --     game.updateSelectedCards()
+        game.selectHand(self)
+        game.updateSelectedCards()
         return
     end
 end
@@ -458,6 +458,34 @@ function game.deselectAllCards()
     vars.handTypeText = ""
 end
 
+function game.drawTooltips(x, y)
+    -- if game.pickedUpItem then
+    --     return -- none of these other
+    --     -- cards are targets.
+    -- end
+    for joker in util.all(vars.heldJokers) do
+        if game.mouseCollCheck(joker.posx, joker.posy, 3, 3) then
+            joker:describe()
+            return true
+        end
+    end
+    for tarot in util.all(vars.heldConsumables) do
+        if game.mouseCollCheck(tarot.posx, tarot.posy, 3, 3) then
+            tarot:describe()
+            return true
+        end
+    end
+    -- if in_shop then
+    --     for special_card in all(shop_options) do
+    --         if mouse_sprite_collision(special_card.posx, special_card.posy, card_width, card_height * 2) then
+    --             special_card:describe()
+    --             return
+    --         end
+    --     end
+    -- end
+    return false
+end
+
 function game.selectHand(card)
     if card.selected == false and vars.selectedCount < vars.maxSelected then
         card.selected = true
@@ -467,9 +495,9 @@ function game.selectHand(card)
         card.selected = false
         vars.selectedCount = vars.selectedCount - 1
         card:place(card.posx, card.posy + 1, 0)
-        --     if vars.selectedCount == 4 then error_message = "" end
+        -- if vars.selectedCount == 4 then error_message = "" end
         -- else
-        --     sfx(sfx_error_message)
+        -- sfx(sfx_error_message)
         --     error_message = "You can only select 5 \ncards at a time"
     end
 end
@@ -512,8 +540,8 @@ end
 
 function itemObj:reset()
     self.selected = false
-    -- self.pos_x = deck_sprite_pos_x
-    -- self.pos_y = deck_sprite_pos_y
+    -- self.posx = deck_sprite_posx
+    -- self.posy = deck_sprite_posy
 end
 
 function itemObj:draw()
@@ -718,21 +746,15 @@ end
 
 -- special cards
 local specialObj = itemObj:new({})
+
 -- description shown when mouse
 -- is over the object
 function specialObj:describe()
-    -- -- window appears at bottom
-    -- rectfill(0,98,127,127,self.bg)
-    -- -- print first letter of type on right side
-    -- print("\^p"..self.type[1],120,99,self.fg)
-    -- spr(self.sprite_index,3,99)
-    -- print(self.name,card_width+8,99,self.fg)
-    -- if type(self.description) == "string" then
-    -- 	print(self.description,1,110,self.fg)
-    -- else
-    -- 	print(self:description(),1,110,self.fg)
-    -- end
-    -- print("\^p"..self.type[1],120,99,self.fg)
+    if type(self.description) == "string" then
+        vars.tooltip = self.description
+    else
+        vars.tooltip = self:description()
+    end
 end
 
 ---@diagnostic disable-next-line: duplicate-set-field
@@ -807,9 +829,9 @@ function game.cardEnhancement(qty, body)
 end
 
 -- all change-suit tarots are the same
-function game.suitChange(new_suit)
+function game.suitChange(newSuit)
     return game.cardEnhancement(3, function(card)
-        card.suit = new_suit
+        card.suit[1] = newSuit
     end)
 end
 
@@ -1339,7 +1361,6 @@ function game.sortSuit(cards)
             table.insert(sorted, h)
         end
     end
-    -- cards = sorted
     return sorted
 end
 
@@ -1350,6 +1371,43 @@ function game.sort(cards)
     if (vars.sortMode == "suit") then
         return game.sortSuit(cards)
     end
+end
+
+function game.getSpecialCardByName(name, type)
+    for specialCardType, v in pairs(game.specialCards) do
+        if specialCardType == type then
+            for card in util.all(v) do
+                if card.name == name then
+                    return card
+                end
+            end
+        end
+    end
+end
+
+function game.changeToSuit(suit, tarot)
+    if #vars.selectedCards <= 3 then
+        for card in util.all(vars.selectedCards) do
+            card.suit[1] = suit
+            card.selected = false
+            card.posy = card.posy + 10
+        end
+        vars.selectedCount = 0
+        util.del(vars.heldConsumables, tarot)
+    else
+        -- sfx(sfx_error_message)
+        -- error_message = "Can only use this\n tarot card with 3 cards"
+    end
+end
+
+function game.findRandomUniqueShopOption(special_card_type, table_to_check)
+    local unique_table = {}
+    for card in util.all(game.specialCards[special_card_type]) do
+        if not util.contains(table_to_check, card) then
+            util.add(unique_table, card)
+        end
+    end
+    return util.rnd(unique_table)
 end
 
 function game.dealHand(shuffledDeck, cardsToDeal)
