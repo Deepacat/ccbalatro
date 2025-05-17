@@ -42,6 +42,7 @@ vars.currentMaxJokers = 5
 vars.currentMaxConsumables = 2
 vars.heldJokers = {}
 vars.heldConsumables = {}
+vars.selectedJoker = nil
 
 -- Game hand
 vars.handTypeText = ""

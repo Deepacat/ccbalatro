@@ -40,6 +40,16 @@ function game.handCollDown()
     end
 end
 
+-- called when mouse down to
+-- check if joker clicked
+function game.jokerCollDown()
+    for joker in util.all(vars.heldJokers) do
+        if game.mouseCollCheck(joker.posx, joker.posy, 3, 3) then
+            return joker
+        end
+    end
+end
+
 -- drop a dragged card or click
 function game.handCollUp(self, px, py)
     local my = obsi.mouse.getY()
@@ -133,9 +143,17 @@ end
 -- sparkles
 function game.addSparkle(text, fgcol, bgcol, source)
     if (source == nil or util.max(0, source.posy) < 1) then return end
+    local function upperAdd(x)
+        if x < vars.screenHeight / 2 then
+            return x + 2
+        end
+        return x
+    end
     util.add(vars.sparkles, {
+        ix = source.posx,
+        iy = upperAdd(source.posy),
         x = source.posx,
-        y = source.posy,
+        y = upperAdd(source.posy),
         text = text,
         fgcol = fgcol,
         bgcol = bgcol,
@@ -147,12 +165,17 @@ end
 function game.drawSparkles()
     for i = #vars.sparkles, 1, -1 do
         local sp = vars.sparkles[i]
-        -- spr(sp.sprite_index, sp.x, sp.y)
-        -- obsi.graphics.write("+", sp.x-1, sp.y - 2, sp.fgcol, sp.bgcol)
-        obsi.graphics.write("+" .. sp.text, sp.x - 1, sp.y - 1, sp.fgcol, sp.bgcol)
+        local function dir(val, offset)
+            if sp.iy > vars.screenHeight / 2 then
+                return val - offset
+            else
+                return val + offset
+            end
+        end
+        obsi.graphics.write("+" .. sp.text, dir(sp.x, 1), dir(sp.y, 1), sp.fgcol, sp.bgcol)
         if sp.frames > 0 then
             sp.frames = sp.frames - 1
-            sp.y = sp.y - 0.3
+            sp.y = dir(sp.y, 0.3)
         else
             util.deli(vars.sparkles, i)
         end
@@ -499,6 +522,14 @@ function game.selectHand(card)
         -- else
         -- sfx(sfx_error_message)
         --     error_message = "You can only select 5 \ncards at a time"
+    end
+end
+
+function game.selectJoker(joker)
+    if vars.selectedJoker == joker then
+        vars.selectedJoker = nil
+    else
+        vars.selectedJoker = joker
     end
 end
 

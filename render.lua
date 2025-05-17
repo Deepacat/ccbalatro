@@ -54,12 +54,14 @@ function render.renderJokers()
     local x = 2
     local y = 2
     for joker in util.all(vars.heldJokers) do
+        if joker == vars.selectedJoker then y = 3 end
         joker:place(x, y)
         joker:draw()
         obsi.graphics.setForegroundColor(colors.white)
         obsi.graphics.rectangle("fill", x, y, 3, 3)
         obsi.graphics.write(tostring(joker.name), x, y, colors.white, colors.black)
         x = x + 4
+        y = 2
     end
     obsi.graphics.write(tostring(#vars.heldJokers) .. "/" .. tostring(vars.currentMaxJokers), 2, 6, colors.white,
         colors.green)
@@ -99,7 +101,8 @@ function render.renderTooltip()
         obsi.graphics.rectangle("line", 7, 7, 38, 6)
         obsi.graphics.setForegroundColor(colors.black)
         obsi.graphics.rectangle("fill", 8, 8, 36, 4)
-        obsi.graphics.write(tostring(vars.tooltip[1]) .. ", " .. tostring(vars.tooltip[2]), 8, 8, colors.white, colors.black)
+        obsi.graphics.write(tostring(vars.tooltip[1]) .. ", " .. tostring(vars.tooltip[2]), 8, 8, colors.white,
+            colors.black)
         for word in util.all(tipArr) do
             if (#word + x >= 45) then
                 y = y + 1

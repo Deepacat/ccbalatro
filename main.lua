@@ -62,6 +62,9 @@ function obsi.onMousePress(x, y, button)
                     game.selectHand(game.handCollDown())
                     game.updateSelectedCards()
                 end
+                if game.jokerCollDown() then
+                    game.selectJoker(game.jokerCollDown())
+                end
                 if game.mouseCollCheck(24, 17, 3, 2) then -- SORT BUTTON
                     game.changeSortMode()
                     return
@@ -121,7 +124,8 @@ function obsi.draw()
     end
     game.drawSparkles()
     render.renderTooltip()
-    obsi.graphics.write(tostring(vars.debugPrint[1]), 26, 1, colors.white, colors.black)
+    -- obsi.graphics.write(tostring(vars.debugPrint[1]), 26, 1, colors.white, colors.black)
+    obsi.graphics.write(tostring(vars.selectedJoker), 26, 1, colors.white, colors.black)
     -- obsi.graphics.write(tostring(vars.debugPrint[3]), 1, 19, colors.white, colors.black)
 end
 
