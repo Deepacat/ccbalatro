@@ -91,7 +91,26 @@ function render.renderHand()
     end
 end
 
--- debug function to see all cards, may repurpose later for viewing deck
+function render.renderTooltip()
+    if vars.tooltip ~= "" then
+        local tipArr = util.splitText(vars.tooltip)
+        local x = 8
+        local y = 8
+        obsi.graphics.setForegroundColor(colors.blue)
+        obsi.graphics.rectangle("line", 7, 7, 38, 6)
+        obsi.graphics.setForegroundColor(colors.black)
+        obsi.graphics.rectangle("fill", x, y, 36, 4)
+        for word in util.all(tipArr) do
+            if(#word + x >= 44) then
+                y = y + 1
+                x = 8
+            end
+            obsi.graphics.write(word, x, y, colors.white, colors.black)
+            x = x + 1 + #word
+        end
+    end
+end
+
 function render.renderAllCards(cards)
     local function drawAll(cardsToDraw, y)
         local baseXOff = 1

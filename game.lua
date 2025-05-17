@@ -540,8 +540,8 @@ end
 
 function itemObj:reset()
     self.selected = false
-    -- self.posx = deck_sprite_posx
-    -- self.posy = deck_sprite_posy
+    self.posx = 49
+    self.posy = 14
 end
 
 function itemObj:draw()

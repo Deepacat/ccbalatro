@@ -18,6 +18,15 @@ function util.dump(o)
     end
 end
 
+-- split sentence into an array
+function util.splitText(str)
+    local t = {}
+    for i in string.gmatch(str, "([^%s]+)") do
+        util.add(t, i)
+    end
+    return t
+end
+
 -- removes the first occurence of value in table
 function util.del(t, v)
     for i = 1, #t do
@@ -34,9 +43,9 @@ util.deli = table.remove
 -- clear a table while preserving
 -- object references to it
 function util.clear(table)
-	for i=#table,1,-1 do
-		util.deli(table,i)
-	end
+    for i = #table, 1, -1 do
+        util.deli(table, i)
+    end
 end
 
 -- shorthand for table.insert

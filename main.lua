@@ -119,7 +119,7 @@ function obsi.draw()
         render.renderAllCards("viewScreen")
     end
     game.drawSparkles()
-    obsi.graphics.write(tostring(vars.tooltip), 1, 19, colors.white, colors.black)
+    render.renderTooltip()
     obsi.graphics.write(tostring(vars.debugPrint[1]), 26, 1, colors.white, colors.black)
     -- obsi.graphics.write(tostring(vars.debugPrint[3]), 1, 19, colors.white, colors.black)
 end
