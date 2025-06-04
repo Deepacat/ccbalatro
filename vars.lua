@@ -20,6 +20,7 @@ vars.tooltip[3] = ""
 -- game
 vars.gameState = "blind"
 vars.initDraw = true
+vars.blind = 1
 vars.ante = 1
 vars.money = 4
 vars.blindGoal = 300

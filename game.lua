@@ -120,7 +120,7 @@ function game.multiplyMult(i, card)
     if (i == 0) then return end
     vars.curMult = vars.curMult * i
     -- sfx(sfx_multiply_mult)
-    game.addSparkle("*"..i, colors.white, colors.magenta, card)
+    game.addSparkle("*" .. i, colors.white, colors.magenta, card)
     game.pause(15)
 end
 
@@ -128,7 +128,7 @@ function game.addMult(i, card)
     if (i == 0) then return end
     vars.curMult = vars.curMult + i
     -- sfx(sfx_add_mult)
-    game.addSparkle("x"..i, colors.white, colors.red, card)
+    game.addSparkle("x" .. i, colors.white, colors.red, card)
     game.pause(10)
 end
 
@@ -136,7 +136,7 @@ function game.addChips(i, card)
     if (i == 0) then return end
     vars.curChips = vars.curChips + i
     -- sfx(sfx_add_chips)
-    game.addSparkle("+"..i, colors.white, colors.blue, card)
+    game.addSparkle("+" .. i, colors.white, colors.blue, card)
     game.pause(10)
 end
 
@@ -193,9 +193,10 @@ function game.makeHandTypesCopy()
 end
 
 function game.winState()
+    vars.gameState = "shop"
     for card in util.all(vars.currentHand) do
-    	card:whenHeldAtEnd()
-    	game.pause(1)
+        card:whenHeldAtEnd()
+        game.pause(1)
     end
     -- error_message = ""
     -- update_round_and_score()	
@@ -203,7 +204,12 @@ function game.winState()
     -- cash_out_money_earned_per_round()
     -- cash_out_money_earned_per_hand_remaining()
     -- add_cards_to_shop()
-    vars.ante = vars.ante + 1
+    if vars.blind == 3 then
+        vars.ante = vars.ante + 1
+        vars.blind = 1
+    else
+        vars.blind = vars.blind + 1
+    end
     vars.selectedCount = 0
     vars.scoredCards = {}
     vars.handsLeft = vars.maxHands
@@ -247,13 +253,22 @@ function game.levelUpHandType(handTypeName, multAmount, chipAmount)
     ht.level = ht.level + 1
 end
 
+function game.cashOutInterest()
+    if vars.money >= 25 then
+        game.addMoney(5, nil)
+    elseif vars.money >= 5 then
+        local interest = util.flr(vars.money / 5)
+        game.addMoney(interest, nil)
+    end
+end
+
 function game.finishScoringHand()
     game.pause(30)
     if vars.currentScore >= (vars.blindGoal) then
         game.pause(30)
-        -- win_state()
-        -- vars.gameState = "shop"
-        game.loseState()
+        game.winState()
+        -- TEMPORARY LOSE RESTART UNTIL SHOP MADE
+        -- game.loseState()
     else
         for card in util.all(vars.selectedCards) do
             util.del(vars.currentHand, card)
