@@ -68,8 +68,18 @@ function render.renderJokers()
 end
 
 function render.renderConsumables()
-    obsi.graphics.setForegroundColor(colors.white)
-    obsi.graphics.rectangle("fill", 48, 2, 3, 3)
+    local x = 48
+    local y = 2
+    for consumable in util.all(vars.heldConsumables) do
+        -- if consumable == vars.selectedJoker then y = 3 end
+        consumable:place(x, y)
+        consumable:draw()
+        obsi.graphics.setForegroundColor(colors.white)
+        obsi.graphics.rectangle("fill", x, y, 3, 3)
+        -- obsi.graphics.write(tostring(consumable.name), x, y, colors.white, colors.black)
+        x = x + -4
+        -- y = 2
+    end
     obsi.graphics.write(tostring(#vars.heldConsumables) .. "/" .. tostring(vars.currentMaxConsumables), 48, 6,
         colors.white,
         colors.green)

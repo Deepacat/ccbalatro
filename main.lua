@@ -19,6 +19,8 @@ function obsi.load()
     vars.baseDeck = game.createBaseDeck()
     vars.currentDeck = game.shuffleDeck(vars.baseDeck)
     game.dealHand(vars.currentDeck, vars.handSize)
+
+    ---- test stuff (giving jokers)
     -- for joker in util.all(game.specialCards.Jokers) do
     --     if (joker.name == "odd todd" or joker.name == "smeared joker") then
     --         util.add(vars.heldJokers, joker)
@@ -35,9 +37,13 @@ end
 function obsi.onKeyPress(key)
     vars.debugPrint[2] = keys.getName(key)
     if util.costatus(vars.animation) == 'dead' then
-        if key == keys.space then     -- Space to change sorting mode
+        if key == keys.space then -- Space to change sorting mode
             game.changeSortMode()
         end
+        if key == keys.q then         -- Q to quit
+            obsi.quit()
+        end
+        -- debug keys
         if key == keys.e then -- E to dealhand
             game.dealHand(vars.currentDeck, 1)
         end
@@ -45,8 +51,9 @@ function obsi.onKeyPress(key)
             local randomJoker = game.findRandomUniqueShopOption("Jokers", vars.heldJokers)
             util.add(vars.heldJokers, randomJoker)
         end
-        if key == keys.q then -- Q to quit
-            obsi.quit()
+        if key == keys.y then
+            local randomConsumable = game.findRandomUniqueShopOption("Tarots", vars.heldConsumables)
+            util.add(vars.heldConsumables, randomConsumable)
         end
     end
 end
@@ -121,6 +128,9 @@ function obsi.draw()
     end
     if vars.gameState == "blindDeckview" then -- ingame deck view
         render.renderAllCards("viewScreen")
+    end
+    if vars.gameState == "shop" then
+        
     end
     game.drawSparkles()
     render.renderTooltip()

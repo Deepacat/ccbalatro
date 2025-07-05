@@ -192,6 +192,15 @@ function game.makeHandTypesCopy()
     end
 end
 
+function game.makeShopStock()
+    vars.shopOptions = {}
+    local shopTypes = { util.rnd(game.special_cards["Planets"]), game.findRandomUniqueShopOption("Jokers",
+        vars.heldJokers), game.findRandomUniqueShopOption("Tarots", vars.heldConsumables) }
+    for i = 1, 4, 1 do
+        util.add(vars.shopOptions, util.rnd(shopTypes))
+    end
+end
+
 function game.winState()
     vars.gameState = "shop"
     for card in util.all(vars.currentHand) do
@@ -238,7 +247,6 @@ function game.loseState()
     -- reset_card_params()
     vars.selectedCards = {}
     vars.scoredCards = {}
-    -- shop_options = {}
     vars.currentHand = {}
     vars.handTypes = vars.handTypesCopy
     vars.initDraw = true
@@ -1450,10 +1458,10 @@ function game.changeToSuit(suit, tarot)
     end
 end
 
-function game.findRandomUniqueShopOption(special_card_type, table_to_check)
+function game.findRandomUniqueShopOption(specialCardType, tableToCheck)
     local unique_table = {}
-    for card in util.all(game.specialCards[special_card_type]) do
-        if not util.contains(table_to_check, card) then
+    for card in util.all(game.specialCards[specialCardType]) do
+        if not util.contains(tableToCheck, card) then
             util.add(unique_table, card)
         end
     end

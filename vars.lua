@@ -19,6 +19,7 @@ vars.tooltip[3] = ""
 
 -- game
 vars.gameState = "blind"
+vars.shopOptions = {}
 vars.initDraw = true
 vars.blind = 1
 vars.ante = 1
